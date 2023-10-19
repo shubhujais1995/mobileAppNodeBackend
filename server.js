@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req, res) => {
-    res.send({"message": "You are hero!"});
+    res.send({"message": "You are hero SJ!"});
 })
 
 app.use(express.json());
