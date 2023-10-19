@@ -10,8 +10,7 @@ router.post('/register/:id', register)
 
 router.post('/verify-otp', verifyOtp)
 
-// router.post('/login', loginUser)
-
-router.get('/current/:id', validateToken,  getCurrentUser)
+// router.get('/current/:id', validateToken,  getCurrentUser)
+router.get('/current/:id',  getCurrentUser)
 
 module.exports = router;
