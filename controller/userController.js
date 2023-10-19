@@ -1,95 +1,172 @@
-// routes/auth.js
-const express = require('express');
-const asyncHandler = require('express-async-handler');
-// const router = express.Router();
-const User = require('../model/userModel');
-require('dotenv').config();
-const twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
-
-// const authToken = "f611bd9776dd9164381fa30e10fe5e30"
-// const accoundSID = "AC48cd1cfe0c7d2b3da8b787e3aafaba69"
-// const client = require("twilio")(accoundSID, authToken);
-
+const express = require("express");
+const asyncHandler = require("express-async-handler");
+const User = require("../model/userModel");
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
+const twilio = require("twilio")(
+  process.env.TWILIO_ACCOUNT_SID,
+  process.env.TWILIO_AUTH_TOKEN
+);
 
 // Route for sending OTP
-// router.post('/send-otp', 
+// router.post('/send-otp',
 
-const sendOTP = asyncHandler ( async (req, res) => {
+let otpVal = "";
+const sendOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
-//   Check if the phone number exists in the database
+  //   Check if the phone number exists in the database
   const user = await User.findOne({ phoneNumber });
-  
+
   if (user) {
     // User exists, send login OTP
-    console.log('req body - user', req.body, user);
+    console.log("req body - user", req.body, user);
     const otp = generateOTP();
+    otpVal = otp;
     sendOTPToUser(phoneNumber, otp);
-    console.log('new otp', otp, ' old otp ', user.otp);
-    const obj = { ...req.body, otp }  
-    const user2 = await User.findByIdAndUpdate(
-      { _id:  String(user._id) },
-      { $set: obj },
-      { new: true }
-    );
-    console.log('user2 otp', user2.otp)
-    return res.send({message: 'User already registered', userDetail: user2 });
-    // return res.json({ message: 'Login OTP sent successfully', user });
+    return res.send({ message: "User already registered", userDetail: user });
   } else {
-    console.log('else otp')
+    console.log("else otp");
     const otp = generateOTP();
     sendOTPToUser(phoneNumber, otp);
+    otpVal = otp;
     const user = await User.create({
-        phoneNumber,
-        otp
+      phoneNumber,
     });
 
-  console.log(user, 'user created');
-    // User doesn't exist, ask for registration
-    return res.json({ message: 'Otp sent Successfully!' });
+    console.log(user, "user created");
+    return res.json({ message: "Otp sent Successfully!" });
   }
 });
+
+const verifyOtp = async (req, res) => {
+  const { phoneNumber, otp } = req.body;
+
+  if (otp !== otpVal) {
+    return res.status(401).json({ message: "Invalid OTP" });
+  } else {
+    const user = await User.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    } else {
+      console.log(user);
+      if (user.name || user.email || user.address) {
+        const accessToken = jwt.sign(
+          {
+            user: {
+              name: user.name,
+              email: user.email,
+              id: String(user._id)
+            },
+          },
+          process.env.ACCESS_TOKEN_SECRET,
+          {
+            expiresIn: "2h",
+          }
+        );
+
+        res.setHeader("Authorization", `Bearer ${accessToken}`);
+        const response = createResponse("success", {
+          message: "User is already registered, Otp verified succesfully!",
+          user
+        });
+        res.status(200).json(response);
+        // return res
+        //   .status(200)
+        //   .json({
+        //     message: "User is already registered, Otp verified succesfully",
+        //     user,
+        //     accessToken,
+        //   });
+      } else {
+        return res
+          .status(200)
+          .json({
+            message: "Otp verified succesfully, Please register the User",
+            user,
+          });
+      }
+    }
+  }
+};
 
 // Route for user registration
-// router.post('/register', 
-const register = asyncHandler( async (req, res) => {
-  const { phoneNumber, email, address } = req.body;
+// router.post('/register',
+const register = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const allUsers = await User.find();
+    const user = allUsers.find((c) => c.id === userId);
+    console.log(userId, allUsers);
 
-  // Create a new user document with the provided details
-  const newUser = await User.create({ phoneNumber, email, address });
+    if (!user) {
+      res.status(404);
+      throw new Error("User not found");
+    }
+    const { phoneNumber, name, email, address } = req.body;
+    const accessToken = jwt.sign(
+      {
+        user: {
+          name: name,
+          email: email,
+          id: userId,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "2h",
+      }
+    );
+    await User.findByIdAndUpdate(
+      { _id: userId },
+      { $set: req.body },
+      { new: true }
+    );
 
-  // Send OTP for registration
-  const otp = generateOTP();
-  sendOTPToUser(phoneNumber, otp);
+    res.setHeader("Authorization", `Bearer ${accessToken}`);
+    const response = createResponse("success", {
+      message: "User created/updated successfully",
+    });
 
-  return res.json({ message: 'Registration OTP sent successfully', user: newUser });
+    res.status(200).json(response);
+  } catch (error) {
+    const response = createResponse("error", {
+      message: "An error occurred while processing the request",
+    });
+    res.status(500).json(response);
+  }
 });
 
-// Route for verifying OTP and logging in
-// router.post('/verify-otp',
-const verifyOtp =  async (req, res) => {
+const getCurrentUser = asyncHandler(async (req, res) => {
+  const userId = req.params.id;
+  const allUsers = await User.find();
+  const user = allUsers.find((c) => c.id === userId);
 
-  const { phoneNumber, otp } = req.body;
-console.log('po', phoneNumber, otp);
-  // Find the user by phone number
-  const user = await User.findOne({ phoneNumber });
-  console.log('user found', user);
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    res.status(404);
+    throw new Error("User not found");
   }
 
-  // Check if the provided OTP matches the stored OTP
-  if (otp !== user.otp) {
-    return res.status(401).json({ message: 'Invalid OTP' });
-  }
+  const obj = {
+    name: user.name,
+    phone: user.phone,
+    address: user.address,
+    email: user.email,
+  };
 
-  // Clear the OTP after successful verification
-  user.otp = undefined;
-  // await user.save();
+  const response = createResponse("success", {
+    message: "Current User Info",
+    data: obj,
+  });
 
-  return res.json({ message: 'Login successful', user });
-    
+  res.status(200).json(response);
+});
+// Function to create a standardized response format
+const createResponse = (status, data) => {
+  return {
+    status,
+    data,
+  };
 };
 
 // Function to generate a random 6-digit OTP
@@ -99,18 +176,70 @@ function generateOTP() {
 
 // Function to send OTP via Twilio SMS
 function sendOTPToUser(phoneNumber, otp) {
-  console.log(phoneNumber, otp, ' in send otp user function!')
-  twilio.messages.create({
-    body: `Your OTP is Shubham: ${otp}`,
-    from: '+12405650825',
-    to: `${phoneNumber}`,
-  }, function(err, data) {
-        if (err) {
-            console.log('message error')
-            console.log('err', err);
-            console.log('data', data);
-        }
-    });//en d of sendMessage;
+  console.log(phoneNumber, otp, " in send otp user function!");
+  twilio.messages.create(
+    {
+      body: `Your OTP is Shubham: ${otp}`,
+      from: "+12405650825",
+      to: `${phoneNumber}`,
+    },
+    function (err, data) {
+      if (err) {
+        console.log("message error");
+        console.log("err", err);
+        console.log("data", data);
+      }
+    }
+  ); //en d of sendMessage;
 }
 
-module.exports = { sendOTP, register, verifyOtp };
+module.exports = { sendOTP, register, verifyOtp, getCurrentUser };
+
+// {
+//   "status": true,
+//   "message": "sucessfully fetched",
+//   "error": 0,
+//   "data": {
+//     "name": "Amit",
+//     "mobile": "9910508758",
+//     "email": "",
+//     "address": "",
+//     "meal_available": 0,
+//     "meal_value": "70",
+//     "user_role":"",
+//     "active_cards":null,
+//     "deactive_cards":null,
+//     "total_transactions": null,
+
+//     "recent_qr_cards": [
+//       {
+//         "qr_id":"13",
+//         "qr_display_name":"My QR Cards-1",
+//         "qr_code": "1kjhbjgvg",
+//         "status": true,
+//         "qr_available_meals": 0,
+//         "qr_app":""
+//       },
+//       {
+//          "qr_id":"234",
+//         "qr_display_name":"My QR Cards-3",
+//         "qr_code": "76vt544",
+//         "status": true,
+//         "qr_available_meals": 0,
+//         "qr_app":""
+//       },
+//       {
+//         "qr_id":"343",
+//         "qr_display_name":"My QR Cards-3",
+//         "qr_code": "fvgr547h",
+//         "status": true,
+//         "qr_available_meals": 0,
+//         "qr_app":""
+//       }
+//     ]
+//   }
+
+// }
+
+// add QR, update QR, get QL list,
+//  Wallet Recharge -> update QR  ,

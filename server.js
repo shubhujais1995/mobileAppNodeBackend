@@ -2,6 +2,10 @@
 const express = require('express');
 // const mongoose = require('mongoose');`
 const userRoutes = require('./router/userRoute');
+const qrRoutes = require('./router/qrRoute');
+const mealsRoutes = require('./router/mealsRoute');
+const fbtRoutes = require('./router/firebaseTokenRoute');
+const errorHandler = require('./middleware/errorHandler');
 const dotenv = require("dotenv").config();
 const connectDb = require("./connection/dbConnection");
 const bodyParser = require('body-parser')
@@ -24,8 +28,15 @@ app.get("/", (req, res) => {
 })
 
 app.use(express.json());
+app.use('/api/qr', qrRoutes);
+// app.post('/api/qr/add-qr', (rq, res) => {
+//   res.status(200).json({"messsage": "this calledd!"})
+// });
+app.use('/api/user', userRoutes);
+app.use('/api/fb', fbtRoutes);
+app.use('/api/meals', mealsRoutes);
+app.use(errorHandler); //middleware for getting error properly
 
-app.use('/api', userRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
