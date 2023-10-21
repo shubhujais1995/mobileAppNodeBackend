@@ -15,48 +15,53 @@ let otpVal = "";
 const sendOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
-  //   Check if the phone number exists in the database
   const user = await User.findOne({ phoneNumber });
 
+  const otp = generateOTP();
+  sendOTPToUser(phoneNumber, otp);
+
   if (user) {
-    // User exists, send login OTP
-    console.log("req body - user", req.body, user);
-    const otp = generateOTP();
-    otpVal = otp;
-    sendOTPToUser(phoneNumber, otp);
-    return res.send({ message: "User already registered", userDetail: user });
+    console.log("user found");
+    const updatedData = {
+      phoneNumber,
+      otp,
+      timestamp: Date.now(),
+    };
+
+    const user = await User.findOneAndUpdate({ phoneNumber }, updatedData, {
+      new: true,
+    });
+    console.log(user, "user updated");
   } else {
-    console.log("else otp");
-    const otp = generateOTP();
-    sendOTPToUser(phoneNumber, otp);
-    otpVal = otp;
     const user = await User.create({
       phoneNumber,
+      otp,
+      timestamp: Date.now(),
     });
 
     console.log(user, "user created");
-    return res.json({ message: "Otp sent Successfully!" });
   }
+
+  return res.json({ message: "Otp sent Successfully!" });
+  // }
 });
 
 const verifyOtp = async (req, res) => {
   const { phoneNumber, otp } = req.body;
+  const user = await User.findOne({ phoneNumber });
+  console.log(user, otp);
+  if (user) {
+    const isTimestampValid =
+      Date.now() - new Date(user.updatedAt).getTime() <= 60000;
 
-  if (otp !== otpVal) {
-    return res.status(401).json({ message: "Invalid OTP" });
-  } else {
-    const user = await User.findOne({ phoneNumber });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    } else {
-      console.log(user);
+    if (otp == user.otp && isTimestampValid) {
       if (user.name || user.email || user.address) {
         const accessToken = jwt.sign(
           {
             user: {
               name: user.name,
               email: user.email,
-              id: String(user._id)
+              id: String(user._id),
             },
           },
           process.env.ACCESS_TOKEN_SECRET,
@@ -68,24 +73,17 @@ const verifyOtp = async (req, res) => {
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         const response = createResponse("success", {
           message: "User is already registered, Otp verified succesfully!",
-          user
+          user,
         });
         res.status(200).json(response);
-        // return res
-        //   .status(200)
-        //   .json({
-        //     message: "User is already registered, Otp verified succesfully",
-        //     user,
-        //     accessToken,
-        //   });
       } else {
-        return res
-          .status(200)
-          .json({
-            message: "Otp verified succesfully, Please register the User",
-            user,
-          });
+        return res.status(200).json({
+          message: "Otp verified succesfully, Please register the User",
+          user,
+        });
       }
+    } else {
+      return res.status(401).json({ message: "Invalid OTP" });
     }
   }
 };
