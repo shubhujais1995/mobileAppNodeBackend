@@ -95,38 +95,45 @@ const register = asyncHandler(async (req, res) => {
     const userId = req.params.id;
     const allUsers = await User.find();
     const user = allUsers.find((c) => c.id === userId);
-    console.log(userId, allUsers);
-
+    
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
-    const { phoneNumber, name, email, address } = req.body;
-    const accessToken = jwt.sign(
-      {
-        user: {
-          name: name,
-          email: email,
-          id: userId,
+    const { name, email, address } = req.body;
+    console.log(email, name, address);
+    if (name && email && address) {
+      const accessToken = jwt.sign(
+        {
+          user: {
+            name: name,
+            email: email,
+            id: userId,
+          },
         },
-      },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: "2h",
-      }
-    );
-    await User.findByIdAndUpdate(
-      { _id: userId },
-      { $set: req.body },
-      { new: true }
-    );
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "2h",
+        }
+      );
+      await User.findByIdAndUpdate(
+        { _id: userId },
+        { $set: req.body },
+        { new: true }
+      );
 
-    res.setHeader("Authorization", `Bearer ${accessToken}`);
-    const response = createResponse("success", {
-      message: "User created/updated successfully",
-    });
+      res.setHeader("Authorization", `Bearer ${accessToken}`);
+      const response = createResponse("success", {
+        message: "User created/updated successfully",
+      });
 
-    res.status(200).json(response);
+      res.status(200).json(response);
+    } else {
+      const response = createResponse("error", {
+        message: "All fields are required",
+      });
+      res.status(400).json(response);
+    }
   } catch (error) {
     const response = createResponse("error", {
       message: "An error occurred while processing the request",
