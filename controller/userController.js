@@ -61,6 +61,7 @@ const verifyOtp = async (req, res) => {
             user: {
               name: user.name,
               email: user.email,
+              user_role:"normal",
               id: String(user._id),
             },
           },
@@ -73,6 +74,7 @@ const verifyOtp = async (req, res) => {
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         const response = createResponse("success", {
           message: "User is already registered, Otp verified succesfully!",
+          token: accessToken,
           user,
         });
         res.status(200).json(response);
@@ -125,6 +127,7 @@ const register = asyncHandler(async (req, res) => {
       res.setHeader("Authorization", `Bearer ${accessToken}`);
       const response = createResponse("success", {
         message: "User created/updated successfully",
+        token: accessToken
       });
 
       res.status(200).json(response);
@@ -157,6 +160,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     phone: user.phone,
     address: user.address,
     email: user.email,
+    role: user.role
   };
 
   const response = createResponse("success", {
