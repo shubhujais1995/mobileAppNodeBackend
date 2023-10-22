@@ -154,13 +154,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-
+console.log(user, user.user_role);
   const obj = {
     name: user.name,
     phone: user.phone,
     address: user.address,
     email: user.email,
-    role: user.role
+    role: user.user_role
   };
 
   const response = createResponse("success", {
