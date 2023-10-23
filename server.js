@@ -5,6 +5,7 @@ const userRoutes = require('./router/userRoute');
 const qrRoutes = require('./router/qrRoute');
 const mealsRoutes = require('./router/mealsRoute');
 const fbtRoutes = require('./router/firebaseTokenRoute');
+const orderRoutes = require('./router/orderRoute');
 const errorHandler = require('./middleware/errorHandler');
 const dotenv = require("dotenv").config();
 const connectDb = require("./connection/dbConnection");
@@ -35,6 +36,7 @@ app.use('/api/qr', qrRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/fb', fbtRoutes);
 app.use('/api/meals', mealsRoutes);
+app.use('/api/orders', orderRoutes);
 app.use(errorHandler); //middleware for getting error properly
 
 

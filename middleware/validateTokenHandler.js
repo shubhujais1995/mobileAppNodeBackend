@@ -15,6 +15,7 @@ const validateToken = asyncHandler(async (req, res, next) => {
                 }
                 
                 req.user = decoded.user;
+                req.token = token;
                 next();
             });
         }

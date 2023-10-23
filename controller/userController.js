@@ -8,10 +8,6 @@ const twilio = require("twilio")(
   process.env.TWILIO_AUTH_TOKEN
 );
 
-// Route for sending OTP
-// router.post('/send-otp',
-
-let otpVal = "";
 const sendOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
@@ -21,7 +17,6 @@ const sendOTP = asyncHandler(async (req, res) => {
   sendOTPToUser(phoneNumber, otp);
 
   if (user) {
-    console.log("user found");
     const updatedData = {
       phoneNumber,
       otp,
@@ -42,8 +37,11 @@ const sendOTP = asyncHandler(async (req, res) => {
     console.log(user, "user created");
   }
 
-  return res.json({ message: "Otp sent Successfully!" });
-  // }
+  // return res.json({ message: "Otp sent Successfully!" });
+
+  const response = createResponse("success", "Otp sent succesfully!", null);
+  res.status(200).json(response);
+
 });
 
 const verifyOtp = async (req, res) => {
@@ -67,25 +65,25 @@ const verifyOtp = async (req, res) => {
           },
           process.env.ACCESS_TOKEN_SECRET,
           {
-            expiresIn: "2h",
+            expiresIn: "1d",
           }
         );
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
-        const response = createResponse("success", {
-          message: "User is already registered, Otp verified succesfully!",
+        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
           token: accessToken,
           user,
         });
         res.status(200).json(response);
       } else {
-        return res.status(200).json({
-          message: "Otp verified succesfully, Please register the User",
+        const response = createResponse("success", "Otp verified succesfully, Please register the User", {
           user,
         });
+        res.status(200).json(response);
       }
     } else {
-      return res.status(401).json({ message: "Invalid OTP" });
+      const response = createResponse("success", "Invalid OTP", null);
+      return res.status(401).json(response);
     }
   }
 };
@@ -105,41 +103,27 @@ const register = asyncHandler(async (req, res) => {
     const { name, email, address } = req.body;
     console.log(email, name, address);
     if (name && email && address) {
-      const accessToken = jwt.sign(
-        {
-          user: {
-            name: name,
-            email: email,
-            id: userId,
-          },
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: "2h",
-        }
-      );
+      
       await User.findByIdAndUpdate(
         { _id: userId },
         { $set: req.body },
         { new: true }
       );
 
-      res.setHeader("Authorization", `Bearer ${accessToken}`);
-      const response = createResponse("success", {
-        message: "User created/updated successfully",
-        token: accessToken
+      res.setHeader("Authorization", `Bearer ${req.token}`);
+      const response = createResponse("success", "User created/updated successfully", {
+        token: req.token,
+        user
       });
 
       res.status(200).json(response);
     } else {
-      const response = createResponse("error", {
-        message: "All fields are required",
-      });
+      const response = createResponse("error", "All fields are required", null);
       res.status(400).json(response);
     }
   } catch (error) {
-    const response = createResponse("error", {
-      message: "An error occurred while processing the request",
+    const response = createResponse("error", "An error occurred while processing the request", {
+      error,
     });
     res.status(500).json(response);
   }
@@ -163,17 +147,17 @@ console.log(user, user.user_role);
     role: user.user_role
   };
 
-  const response = createResponse("success", {
-    message: "Current User Info",
+  const response = createResponse("success",  "Current User Info", {
     data: obj,
   });
 
   res.status(200).json(response);
 });
 // Function to create a standardized response format
-const createResponse = (status, data) => {
+const createResponse = (status, message, data) => {
   return {
     status,
+    message,
     data,
   };
 };
