@@ -100,9 +100,9 @@ const register = asyncHandler(async (req, res) => {
       res.status(404);
       throw new Error("User not found");
     }
-    const { name, email, address } = req.body;
+    const { name, email, address, wallet = 0 } = req.body;
     console.log(email, name, address);
-    if (name && email && address) {
+    if (name && email && address ) {
       
       await User.findByIdAndUpdate(
         { _id: userId },
