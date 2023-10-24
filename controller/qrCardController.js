@@ -2,12 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const QRCard = require("../model/qaCardModel");
+const User = require("../model/userModel");
 const ObjectId = require('mongodb').ObjectId;
 const addQR = asyncHandler(async (req, res) => {
   const {
     qr_id,
     qr_display_name,
     qr_code,
+    total_meals,
     qr_available_meals,
     qr_app,
     qr_status,
@@ -17,6 +19,7 @@ const addQR = asyncHandler(async (req, res) => {
     !qr_id ||
     !qr_display_name ||
     !qr_code ||
+    !total_meals ||
     !qr_available_meals ||
     !qr_app ||
     !qr_status
@@ -29,6 +32,7 @@ const addQR = asyncHandler(async (req, res) => {
     qr_id,
     qr_code,
     qr_display_name,
+    total_meals,
     qr_available_meals,
     qr_app,
     qr_status,
@@ -57,7 +61,9 @@ const updateQR = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User don't have permission to update other user contacts");
   }
-
+  if(qr_status === false) {
+    console.log(req.user);
+  }
   await QRCard.findByIdAndUpdate({ _id: qrId }, { qr_status }, { new: true });
 //   await QRCard.update({ _id:  new ObjectId(qrId) }, { qr_status }, function (err, result) {
     // if (err) {
@@ -67,7 +73,7 @@ const updateQR = asyncHandler(async (req, res) => {
     //     (err === null) ? {msg: 'updated'} : {msg: err}
     // )});
   const response = createResponse(200, {
-    message: "QR Status succesfully!",
+    message: "QR Status updated succesfully!",
   });
   res.status(200).json(response);
 });
