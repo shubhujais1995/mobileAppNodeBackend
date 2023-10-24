@@ -96,7 +96,7 @@ const verifyOtp = async (req, res) => {
         res.status(200).json(response);
       }
     } else {
-      const response = createResponse("success", "Invalid OTP", null);
+      const response = createResponse("error", "Invalid OTP", null);
       return res.status(401).json(response);
     }
   }

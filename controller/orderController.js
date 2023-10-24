@@ -55,19 +55,19 @@ const AddOrder = asyncHandler(async (req, res) => {
     // res.status(200).json({ success: true, obdaj });
 
     const response = createResponse(
-      201,
-      "Order created succesfully!" ,
-      { orderCreated }
+      "success",
+      "Order created succesfully!",
+      orderCreated 
     );
     
     res.status(201).json(response);
   } catch (error) {
     console.error("Error from axios:", error);
     // res.status(500).json({ success: false, error: "Internal Server Error" });
-    const response = createResponse(201, {
-      message: "Order creation failed!",
-      error,
-    });
+    const response = createResponse("error", 
+      "Order creation failed!",
+      null,
+    );
     res.status(200).json(response);
   }
 });
