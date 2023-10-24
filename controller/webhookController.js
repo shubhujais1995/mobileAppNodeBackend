@@ -4,15 +4,14 @@ const Webhook = require("../model/webhookModel");
 require("dotenv").config();
 
 const webhookCall = asyncHandler(async (req, res) => {
-  const meal = 101; //req.body.meals;
-  const userId = req.user.id; 
+  const meal = 105; //req.body.meals;
+  // const userId = req.user.id; 
 
   console.log("res came!");
-  console.log(userId, meal.meals);
+  console.log( meal.meals);
 
   const mealCreated = await Webhook.create({
-    meals: meal,
-    user_id: userId
+    meals: meal
   });
 
   
