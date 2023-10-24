@@ -6,7 +6,7 @@ const { sendOTP, verifyOtp, register, getCurrentUser } = require('../controller/
 
 router.post('/send-otp', sendOTP);
 
-router.post('/register/:id', register)
+router.post('/register/:id', validateToken, register)
 
 router.post('/verify-otp', verifyOtp)
 
