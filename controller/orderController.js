@@ -17,7 +17,7 @@ const AddOrder = asyncHandler(async (req, res) => {
     const AuthorizationToken =
       "Basic cnpwX3Rlc3RfRFpWTzBIWjR3MVdZSGk6M1pJSmlJNFM1cFoyOHQyY3ZLblR0S3hK";
 
-    const apiResponse = await axios.post(url, req.body, {
+    const apiResponse = await axios.post(url, {amount, currency}, {
       headers: {
         Authorization: `${AuthorizationToken}`,
         "Content-Type": "application/json",
