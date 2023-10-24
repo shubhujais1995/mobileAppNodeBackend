@@ -173,7 +173,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     phone: user.phone,
     address: user.address,
     email: user.email,
-    role: user.user_role
+    role: user.user_role,
+    wallet: user.wallet
   };
 
   const response = createResponse("success",  "Current User Info", {
