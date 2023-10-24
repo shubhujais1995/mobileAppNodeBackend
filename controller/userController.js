@@ -178,7 +178,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   };
 
   const response = createResponse("success",  "Current User Info", {
-    data: obj,
+    obj
   });
 
   res.status(200).json(response);
