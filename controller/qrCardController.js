@@ -39,10 +39,7 @@ const addQR = asyncHandler(async (req, res) => {
     user_id: req.user.id,
   });
 
-  const response = createResponse(201, {
-    message: "QR Added succesfully!",
-    qr,
-  });
+  const response = createResponse("success", "QR Added succesfully!", qr);
   res.status(201).json(response);
 });
 
@@ -72,9 +69,7 @@ const updateQR = asyncHandler(async (req, res) => {
     // res.send(
     //     (err === null) ? {msg: 'updated'} : {msg: err}
     // )});
-  const response = createResponse(200, {
-    message: "QR Status updated succesfully!",
-  });
+  const response = createResponse("success", "QR Status updated succesfully!", null);
   res.status(200).json(response);
 });
 
@@ -82,24 +77,19 @@ const fetchQRList = asyncHandler(async (req, res) => {
   const allQRs = await QRCard.find();
 
   if (!allQRs.length) {
-    const response = createResponse(200, {
-        message: "QR List is found empty!",
-        allQRs,
-      });
-      res.status(200).json(response);
+    const response = createResponse("success", "QR List is found empty!", null);
+    res.status(200).json(response);
   } else {
-    const response = createResponse(200, {
-      message: "QR List fetched succesfully!",
-      allQRs,
-    });
+    const response = createResponse("success", "QR List fetched succesfully!", allQRs);
     res.status(200).json(response);
   }
 });
 
 // Function to create a standardized response format
-const createResponse = (status, data) => {
+const createResponse = (status, message, data) => {
   return {
     status,
+    message,
     data,
   };
 };
