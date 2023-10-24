@@ -54,11 +54,31 @@ const verifyOtp = async (req, res) => {
 
     if (otp == user.otp && isTimestampValid) {
       if (user.name || user.email || user.address) {
+        // const accessToken = jwt.sign(
+        //   {
+        //     user: {
+        //       name: user.name,
+        //       email: user.email,
+        //       user_role:"normal",
+        //       id: String(user._id),
+        //     },
+        //   },
+        //   process.env.ACCESS_TOKEN_SECRET,
+        //   {
+        //     expiresIn: "1d",
+        //   }
+        // );
+
+        res.setHeader("Authorization", `Bearer ${req.token}`);
+        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
+          token: req.token,
+          user,
+        });
+        res.status(200).json(response);
+      } else {
         const accessToken = jwt.sign(
           {
             user: {
-              name: user.name,
-              email: user.email,
               user_role:"normal",
               id: String(user._id),
             },
@@ -68,17 +88,11 @@ const verifyOtp = async (req, res) => {
             expiresIn: "1d",
           }
         );
-
-        res.setHeader("Authorization", `Bearer ${accessToken}`);
-        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
+        const response = createResponse("success", "Otp verified succesfully, Please register the User", {
           token: accessToken,
           user,
         });
-        res.status(200).json(response);
-      } else {
-        const response = createResponse("success", "Otp verified succesfully, Please register the User", {
-          user,
-        });
+        res.setHeader("Authorization", `Bearer ${accessToken}`);
         res.status(200).json(response);
       }
     } else {
@@ -103,16 +117,31 @@ const register = asyncHandler(async (req, res) => {
     const { name, email, address, wallet = 0 } = req.body;
     console.log(email, name, address);
     if (name && email && address ) {
-      
+      const accessToken = jwt.sign(
+        {
+          user: {
+            name: user.name,
+            email: user.email,
+            user_role:"normal",
+            id: String(user._id),
+          },
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "1d",
+        }
+      );
+
+      res.setHeader("Authorization", `Bearer ${accessToken}`);
       await User.findByIdAndUpdate(
         { _id: userId },
         { $set: req.body },
         { new: true }
       );
 
-      res.setHeader("Authorization", `Bearer ${req.token}`);
+      res.setHeader("Authorization", `Bearer ${accessToken}`);
       const response = createResponse("success", "User created/updated successfully", {
-        token: req.token,
+        token: accessToken,
         user
       });
 
@@ -138,7 +167,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User not found");
   }
-console.log(user, user.user_role);
+
   const obj = {
     name: user.name,
     phone: user.phone,
