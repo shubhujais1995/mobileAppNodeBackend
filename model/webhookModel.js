@@ -2,7 +2,12 @@ const mongoose = require("mongoose");
 
 const webhookSchema = mongoose.Schema(
   {
-    meals: { type: Number },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    meals: { type: Number }
   },
   {
     timestamps: true,
