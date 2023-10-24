@@ -177,9 +177,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     wallet: user.wallet
   };
 
-  const response = createResponse("success",  "Current User Info", {
-    obj
-  });
+  const response = createResponse("success",  "Current User Info", obj);
 
   res.status(200).json(response);
 });
