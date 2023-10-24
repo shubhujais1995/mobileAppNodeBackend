@@ -26,7 +26,7 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req, res) => {
-    res.send({"message": "You are hero Testing!"});
+    res.send({"message": "You are hero Testing! ... Updated again! "});
 })
 
 // app.post('/api/qr/add-qr', (rq, res) => {
