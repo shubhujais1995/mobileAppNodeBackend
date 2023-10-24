@@ -9,7 +9,8 @@ const twilio = require("twilio")(
 );
 
 const webhookCall = asyncHandler(async (req, res) => {
-
+  console.log("res came!");
+  console.log(req.body);
   const response = createResponse("success", "Webhook Api called!", null);
   res.status(200).json(response);
 });

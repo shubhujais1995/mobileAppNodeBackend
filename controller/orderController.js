@@ -1,5 +1,3 @@
-const express = require("express");
-const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const Order = require("../model/orderModel");
 const axios = require("axios");
@@ -52,15 +50,13 @@ const AddOrder = asyncHandler(async (req, res) => {
 
     console.log("response from axios and created order", obj, orderCreated);
 
-    // res.status(200).json({ success: true, obdaj });
-
     const response = createResponse(
       "success",
       "Order created succesfully!",
       orderCreated 
     );
     
-    res.status(201).json(response);
+    res.status(200).json(response);
   } catch (error) {
     console.error("Error from axios:", error);
     // res.status(500).json({ success: false, error: "Internal Server Error" });
