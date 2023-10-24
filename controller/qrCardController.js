@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const QRCard = require("../model/qaCardModel");
 const User = require("../model/userModel");
-const ObjectId = require('mongodb').ObjectId;
+
 const addQR = asyncHandler(async (req, res) => {
   const {
     qr_id,
@@ -58,18 +58,36 @@ const updateQR = asyncHandler(async (req, res) => {
     res.status(404);
     throw new Error("User don't have permission to update other user contacts");
   }
-  if(qr_status === false) {
-    console.log(req.user);
+
+  if (qr_status == false) {
+    const userId = req.user.id;
+    const userDetail = await User.findOne({ _id: userId });
+
+    if (userDetail) {
+      const updatedWalletValue = userDetail.wallet + qr.qr_available_meals;
+
+      await User.findByIdAndUpdate(
+        req.user.id,
+        { $set: { wallet: updatedWalletValue } },
+        { new: true }
+      );
+
+      const qr_available_meals = 0;
+      await QRCard.findByIdAndUpdate(
+        { _id: qrId },
+        { qr_status, qr_available_meals },
+        { new: true }
+      );
+    }
+  } else {
+    await QRCard.findByIdAndUpdate({ _id: qrId }, { qr_status }, { new: true });
   }
-  await QRCard.findByIdAndUpdate({ _id: qrId }, { qr_status }, { new: true });
-//   await QRCard.update({ _id:  new ObjectId(qrId) }, { qr_status }, function (err, result) {
-    // if (err) {
-    //     console.log('some error');
-    // }
-    // res.send(
-    //     (err === null) ? {msg: 'updated'} : {msg: err}
-    // )});
-  const response = createResponse("success", "QR Status updated succesfully!", null);
+
+  const response = createResponse(
+    "success",
+    "QR Status updated succesfully!",
+    null
+  );
   res.status(200).json(response);
 });
 
@@ -80,7 +98,11 @@ const fetchQRList = asyncHandler(async (req, res) => {
     const response = createResponse("success", "QR List is found empty!", null);
     res.status(200).json(response);
   } else {
-    const response = createResponse("success", "QR List fetched succesfully!", allQRs);
+    const response = createResponse(
+      "success",
+      "QR List fetched succesfully!",
+      allQRs
+    );
     res.status(200).json(response);
   }
 });
