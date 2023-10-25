@@ -4,6 +4,6 @@ const validateToken = require("../middleware/validateTokenHandler");
 
 const { webhookCall } = require('../controller/webhookController');
 
-router.post('/webhook', validateToken, webhookCall);
+router.post('/webhook', webhookCall);
 
 module.exports = router;

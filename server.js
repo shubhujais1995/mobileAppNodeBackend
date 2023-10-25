@@ -26,15 +26,15 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req, res) => {
-    res.send({"message": "You are hero Testing! Thanks"});
+    res.send({"message": "Deployed Smiles again :-)!"});
 })
 
 // app.post('/api/qr/add-qr', (rq, res) => {
 //   res.status(200).json({"messsage": "this calledd!"})
 // });
 app.use(express.json());
-app.use('/api/qr', qrRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/qr', qrRoutes);
 app.use('/api/fb', fbtRoutes);
 app.use('/api/meals', mealsRoutes);
 app.use('/api/orders', orderRoutes);

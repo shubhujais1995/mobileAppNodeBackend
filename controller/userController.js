@@ -10,9 +10,8 @@ const twilio = require("twilio")(
 
 const sendOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
-
   const user = await User.findOne({ phoneNumber });
-
+  console.log(phoneNumber, user);
   const otp = generateOTP();
   sendOTPToUser(phoneNumber, otp);
 
@@ -37,7 +36,6 @@ const sendOTP = asyncHandler(async (req, res) => {
     console.log(user, "user created");
   }
 
-  // return res.json({ message: "Otp sent Successfully!" });
 
   const response = createResponse("success", "Otp sent succesfully!", null);
   res.status(200).json(response);
