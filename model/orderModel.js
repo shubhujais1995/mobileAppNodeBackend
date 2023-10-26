@@ -3,32 +3,19 @@ const mongoose = require("mongoose");
 const orderSchema = mongoose.Schema(
   {
     user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: "User",
-    },
-    id: {
-      type: "string",
-    },
-    orderId: {
-      type: "string",
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: "User",
     },
-    method: {
-      type: "string",
-    },
-    entity: {
-      type: "string",
-    },
-    amount: {
-      type: "number",
-    },
-    currency: {
-      type: "string",
-    },
-    status: {
-      type: "string",
-    },
+    id: { type: String },
+    orderId: { type: String, required: true },
+    method: { type: String },
+    entity: { type: String },
+    amount: { type: Number },
+    currency: { type: String },
+    status: { type: String },
+    divideToAllCards: { type: Boolean },
+    qr_id: { type: String },
   },
   {
     timestamps: true,

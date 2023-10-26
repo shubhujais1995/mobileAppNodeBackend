@@ -2,13 +2,13 @@ const asyncHandler = require("express-async-handler");
 const Order = require("../model/orderModel");
 const axios = require("axios");
 
-const AddOrder = asyncHandler(async (req, res) => {
+const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
   try {
     const { amount, currency, divideToAllCards, qr_id } = req.body;
 
-    if (!amount || !currency) {
+    if (!amount || !currency || !qr_id) {
       res.status(400);
-      throw new Error("All fields are mandatory");
+      throw new Error("All fields are mandatory in AddOrderGetPaymentId API");
     }
 
     const url = "https://api.razorpay.com/v1/orders";
@@ -23,19 +23,10 @@ const AddOrder = asyncHandler(async (req, res) => {
     });
     const responseData = apiResponse.data;
 
-    // id: 'order_Mrlm3WcBPTxCRI',
-    // entity: 'order',
-    // amount: 500,
-    // amount_paid: 0,
-    // amount_due: 500,
-    // currency: 'INR',
-    // receipt: null,
-    // offer_id: null,
-    // status: 'created',
-    // attempts: 0,
-    // notes: [],
-    // created_at: 1698090575
-    console.log(req.user.id);
+    console.log(
+      "responseData response from axios success -" , responseData
+    );
+
     const obj = {
       id: responseData.id,
       orderId: responseData.id,
@@ -44,6 +35,8 @@ const AddOrder = asyncHandler(async (req, res) => {
       method: "card",
       amount: responseData.amount,
       user_id: req.user.id,
+      divideToAllCards, 
+      qr_id
     };
 
     const orderCreated = await Order.create(obj);
@@ -150,4 +143,4 @@ const createResponse = (status, message, data) => {
   };
 };
 
-module.exports = { AddOrder };
+module.exports = { AddOrderGetPaymentId };

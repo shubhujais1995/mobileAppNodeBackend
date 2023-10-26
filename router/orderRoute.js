@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const validateToken = require("../middleware/validateTokenHandler");
-const { AddOrder } = require('../controller/orderController');
+const { AddOrderGetPaymentId } = require('../controller/orderController');
 
-router.post('/getPaymentId', validateToken, AddOrder);
+router.post('/getPaymentId', validateToken, AddOrderGetPaymentId);
 
 module.exports = router;
