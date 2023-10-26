@@ -10,9 +10,28 @@ const webhookCall = asyncHandler(async (req, res) => {
     account_id,
     payload: {
       payment: {
-        entity: { amount, id, email, method, bank, order_id },
-      },
-    },
+        entity: {
+          id,
+          amount,
+          currency,
+          status,
+          order_id,
+          method,
+          amount_refunded,
+          refund_status,
+          card_id,
+          bank,
+          wallet,
+          vpa,
+          email,
+          contact,
+          error_code,
+          error_reason,
+          acquirer_data: { bank_transaction_id },
+          created_at
+        }
+      }
+    }
   } = req.body;
   
   console.log("api called! ", req.body); 
@@ -36,22 +55,46 @@ const webhookCall = asyncHandler(async (req, res) => {
   }
 
  // Use the extracted values
-console.log("Account ID:", account_id);
-console.log("Amount:", amount);
+// Use the extracted values
 console.log("ID:", id);
-console.log("Email:", email);
-console.log("Method:", method);
-console.log("Bank:", bank);
+console.log("Amount:", amount);
+console.log("Currency:", currency);
+console.log("Status:", status);
 console.log("Order ID:", order_id);
+console.log("Method:", method);
+console.log("Amount Refunded:", amount_refunded);
+console.log("Refund Status:", refund_status);
+console.log("Card ID:", card_id);
+console.log("Bank:", bank);
+console.log("Wallet:", wallet);
+console.log("VPA:", vpa);
+console.log("Email:", email);
+console.log("Contact:", contact);
+console.log("Error Code:", error_code);
+console.log("Error Reason:", error_reason);
+console.log("Bank Transaction ID:", bank_transaction_id);
+console.log("Created At:", created_at);
 
   const mealCreated = await Webhook.create({
-    bank,
-    order_id,
+    account_id,
     id,
     amount,
-    email,
+    currency,
+    status,
+    order_id,
     method,
-    account_id,
+    amount_refunded,
+    refund_status,
+    card_id,
+    bank,
+    wallet,
+    vpa,
+    email,
+    contact,
+    error_code,
+    error_reason,
+    bank_transaction_id,
+    created_at
   });
 
   console.log("Meal Created ", mealCreated);
