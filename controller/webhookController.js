@@ -75,7 +75,7 @@ const webhookCall = asyncHandler(async (req, res) => {
   console.log("Meal Created ", mealCreated);
 
   if(mealCreated) {
-    const orderDetail = await Order.findOne({ order_id });
+    const orderDetail = await Order.findOne({ orderId });
 
     if(orderDetail.divideToAllCards) {
       console.log('Do devide to all qrs.');
