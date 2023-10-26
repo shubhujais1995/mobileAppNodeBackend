@@ -11,7 +11,7 @@ const qrCardShema = mongoose.Schema(
     qr_display_name: { type: String, required: true },
     qr_code: { type: String, required: true },
     qr_status: { type: Boolean, required: true },
-    total_meals: { type: String, required: true },
+    total_meals: { type: Number, required: true },
     qr_available_meals: { type: Number, required: true },
     qr_app: { type: String, required: true },
   },

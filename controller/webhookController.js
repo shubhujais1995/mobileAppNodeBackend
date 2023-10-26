@@ -2,12 +2,10 @@ const asyncHandler = require("express-async-handler");
 const Webhook = require("../model/webhookModel");
 const Order = require("../model/orderModel");
 const QRCardModel = require("../model/qaCardModel");
+
 require("dotenv").config();
 
 const webhookCall = asyncHandler(async (req, res) => {
-  // const meal = 105; //req.body.meals;
-  // const userId = req.user.id;
-
   const {
     account_id,
     payload: {
@@ -30,13 +28,12 @@ const webhookCall = asyncHandler(async (req, res) => {
           error_code,
           error_reason,
           acquirer_data: { bank_transaction_id },
-          created_at
-        }
-      }
-    }
+          created_at,
+        },
+      },
+    },
   } = req.body;
-  
-  
+
   if (
     !amount ||
     !id ||
@@ -69,49 +66,70 @@ const webhookCall = asyncHandler(async (req, res) => {
     error_code,
     error_reason,
     bank_transaction_id,
-    created_at
+    created_at,
   });
 
   console.log("Meal Created ", mealCreated);
 
-  if(mealCreated) {
-    const orderDetail = await Order.findOne({ orderId });
+  if (mealCreated) {
+    const orderDetail = await Order.findOne({ orderId: mealCreated.order_id });
 
-    if(orderDetail.divideToAllCards) {
-      console.log('Do devide to all qrs.');
-    } else {
+    console.log(orderDetail);
 
-      const qRCardDetail = await QRCardModel.findOne({ qr_id });
-      const totalMealCame = mealCreated.amout / 70; 
-      console.log(qRCardDetail, totalMealCame);
-      qRCardDetail.total_meals += totalMealCame;
-      qRCardDetail.qr_available_meals += totalMealCame;
+    if (orderDetail) {
+      if (orderDetail.status !== "captured") {
+        if (orderDetail.divideToAllCards) {
+          console.log("Do devide to all qrs.");
+        } else {
+          const { qr_id } = orderDetail;
 
-      console.log(qRCardDetail);
+          const qRCardDetail = await QRCardModel.findOne({ qr_id });
 
-      if(qRCardDetail.status == false) {
-        qRCardDetail.status = true;
+          const totalMealCame = Math.ceil(mealCreated.amount / 70);
+
+          qRCardDetail.total_meals =
+            Number(qRCardDetail.total_meals) + totalMealCame;
+
+          qRCardDetail.qr_available_meals =
+            Number(qRCardDetail.qr_available_meals) + totalMealCame;
+
+          qRCardDetail.status = qRCardDetail.status == false ? true : true;
+
+          const _id = qRCardDetail._id.toString();
+
+          const { qr_available_meals, qr_status, total_meals } = qRCardDetail;
+
+          console.log(_id, qr_available_meals, qr_status, total_meals);
+
+          await QRCardModel.findByIdAndUpdate(
+            { _id },
+            { qr_available_meals, qr_status, total_meals },
+            { new: true }
+          );
+
+          console.log("Updated the QR model");
+
+          const qRCardDetailAfterUpdate = await QRCardModel.findOne({ qr_id });
+
+          console.log(
+            "qRCardDetail AfterUpdate fetch back ",
+            qRCardDetailAfterUpdate
+          );
+
+          const response = createResponse(
+            "success",
+            "Webhook Api called! and udpate QR amount & meals",
+            qRCardDetailAfterUpdate
+          );
+          res.status(200).json(response);
+        }
+      } else {
+        console.log("orderDetail.status  - Captured");
       }
-
-      await QRCard.findByIdAndUpdate(
-        { _id: qrId },
-        { qr_available_meals, total_meals, qr_status },
-        { new: true }
-      );
-
-      const qRCardDetailAfterUpdate = await QRCardModel.findOne({ qr_id });
-      console.log("after update ", qRCardDetailAfterUpdate);
-      
-      const response = createResponse(
-        "success",
-        "Webhook Api called! and udpate QR amount & meals",
-        
-      );
-      res.status(200).json(response);
+    } else {
+      console.log("Order Id did not match!");
     }
   }
-
- 
 });
 
 // Function to create a standardized response format
