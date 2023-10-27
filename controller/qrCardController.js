@@ -15,13 +15,7 @@ const addQR = asyncHandler(async (req, res) => {
     qr_status,
   } = req.body;
 
-  if (
-    !qr_id ||
-    !qr_display_name ||
-    !qr_code ||
-    !qr_app ||
-    !qr_status
-  ) {
+  if (!qr_id || !qr_display_name || !qr_code || !qr_app || !qr_status) {
     res.status(400);
     throw new Error("All fields are mandatory");
   }
@@ -105,6 +99,38 @@ const fetchQRList = asyncHandler(async (req, res) => {
   }
 });
 
+const redeemQr = asyncHandler(async (req, res) => {
+
+  const { qr_id } = req.body;
+
+  const qrDetail = await QRCard.find({ qr_id });
+
+  if (!qrDetail) {
+    res.status(404);
+    throw new Error("Please provide valid QR Id!");
+  } else {
+    if (qr_available_meals >= 1) {
+      let qr_available_meals = qrDetail.qr_available_meals - 1;
+    } else {
+      res.status(404);
+      throw new Error("Meals are not left in your account!");
+    }
+
+    await QRCard.findByIdAndUpdate(
+      { _id: qrDetail._id },
+      { qr_available_meals },
+      { new: true }
+    );
+
+    const response = createResponse(
+      "success",
+      "Meal redeem succesfully!",
+      null
+    );
+    res.status(200).json(response);
+  }
+
+});
 // Function to create a standardized response format
 const createResponse = (status, message, data) => {
   return {
@@ -113,4 +139,4 @@ const createResponse = (status, message, data) => {
     data,
   };
 };
-module.exports = { addQR, updateQR, fetchQRList };
+module.exports = { addQR, updateQR, fetchQRList, redeemQr };
