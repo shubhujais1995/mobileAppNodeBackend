@@ -35,8 +35,8 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
       method: "card",
       amount: responseData.amount,
       user_id: req.user.id,
-      divideToAllCards, 
-      qr_id
+      divideToAllCards: divideToAllCards, 
+      qr_id:qr_id
     };
 
     const orderCreated = await Order.create(obj);

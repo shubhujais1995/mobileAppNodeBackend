@@ -2,6 +2,7 @@ const asyncHandler = require("express-async-handler");
 const Webhook = require("../model/webhookModel");
 const Order = require("../model/orderModel");
 const QRCardModel = require("../model/qaCardModel");
+const UserModel = require("../model/userModel");
 
 require("dotenv").config();
 
@@ -69,29 +70,129 @@ const webhookCall = asyncHandler(async (req, res) => {
     created_at,
   });
 
-  console.log("Meal Created ", mealCreated);
-
   if (mealCreated) {
     const orderDetail = await Order.findOne({ orderId: mealCreated.order_id });
 
-    console.log(orderDetail);
+    // console.log(orderDetail);
 
     if (orderDetail) {
       if (orderDetail.status !== "captured") {
         if (orderDetail.divideToAllCards) {
-          console.log("Do devide to all qrs.");
+          // console.log("Do devide to all qrs.");
+
+          // Fetch documents where the 'code' field is in the provided array
+          const allQrCodes = await QRCardModel.find();
+          // console.log(" All Qr code s ", allQrCodes.length);
+          const allQrCodesLength = allQrCodes.length;
+          const totalMealCame = parseInt(mealCreated.amount / 70);
+          let remainingMeals = 0;
+          // console.log("totalMealCame" , totalMealCame," remaining meals ",  remainingMeals);
+
+          if (totalMealCame > 1) {
+            remainingMeals = (mealCreated.amount / 70) % allQrCodesLength;
+          }
+          // const remainingMeals = totalMealCame % allQrCodes.length;
+          const eachMeal = parseInt(totalMealCame / allQrCodesLength);
+
+          console.log(
+            "totalMealCame",
+            totalMealCame,
+            " remaining meals ",
+            remainingMeals,
+            "each meals",
+            eachMeal
+          );
+          // console.log("totalMealCame" , totalMealCame, remainingMeals, "allQrCodes.length", allQrCodes.length);
+
+          // console.log('calc - ', remainingMeals, eachMeal);
+
+          if (remainingMeals == 0) {
+            const updatedMealsId = allQrCodes.map((qr) => {
+              qr.qr_available_meals = qr.qr_available_meals + eachMeal;
+              qr.total_meals = qr.total_meals + eachMeal;
+
+              return qr._id.toString();
+            });
+
+            for (let i = 0; i < allQrCodes.length; i++) {
+              const element = allQrCodes[i];
+              const _id = element._id.toString();
+              const qr_available_meals = element.qr_available_meals;
+              const total_meals = element.total_meals;
+
+              console.log(_id, qr_available_meals, total_meals);
+
+              await QRCardModel.findByIdAndUpdate(
+                { _id },
+                { qr_available_meals, total_meals },
+                { new: true }
+              );
+            }
+          } else {
+            console.log("came in else");
+            const updatedMealsId = allQrCodes.map((qr) => {
+              console.log(qr);
+              // console.log('inmap ', qr.qr_available_meals, qr.total_meals)
+              // qr.qr_available_meals = qr.qr_available_meals + eachMeal;
+              // qr.total_meals = qr.total_meals + eachMeal;
+
+              return qr._id.toString();
+            });
+
+            // console.log('update qrs ', allQrCodes);
+
+            // console.log('updated QRs Id', updatedMealsId);
+
+            console.log("Here");
+            for (let i = 0; i < allQrCodes.length; i++) {
+              const element = allQrCodes[i];
+              const _id = element._id.toString();
+              const qr_available_meals = element.qr_available_meals;
+              const total_meals = element.total_meals;
+
+              console.log(_id, qr_available_meals, total_meals);
+              // Use await inside an async function
+              await QRCardModel.findByIdAndUpdate(
+                { _id },
+                { qr_available_meals, total_meals },
+                { new: true }
+              );
+            }
+
+            // console.log("updateResult - ", updateResult);
+
+            const userId = orderDetail.user_id.toString(); // req.user.id.toString();
+
+            console.log("user id ", userId);
+
+            const userDetail = await UserModel.find({ _id: userId });
+
+            console.log("user detail received", userDetail);
+
+            const updateWallet = userDetail[0].wallet + remainingMeals;
+
+            console.log("check after update wallet", updateWallet);
+
+            await UserModel.findByIdAndUpdate(
+              { _id: userId },
+              { wallet: updateWallet },
+              { new: true }
+            );
+
+            const userDetailUpdate = await UserModel.find({ _id: userId });
+            console.log("received after update", userDetailUpdate);
+          }
         } else {
           const { qr_id } = orderDetail;
 
           const qRCardDetail = await QRCardModel.findOne({ qr_id });
 
-          const totalMealCame = Math.ceil(mealCreated.amount / 70);
+          const totalMealCame = parseInt(mealCreated.amount / 70);
 
-          qRCardDetail.total_meals =
-            Number(qRCardDetail.total_meals) + totalMealCame;
+          qRCardDetail.total_meals = qRCardDetail.total_meals + totalMealCame;
 
           qRCardDetail.qr_available_meals =
-            Number(qRCardDetail.qr_available_meals) + totalMealCame;
+            qRCardDetail.qr_available_meals + totalMealCame;
 
           qRCardDetail.status = qRCardDetail.status == false ? true : true;
 
@@ -140,5 +241,25 @@ const createResponse = (status, message, data) => {
     data,
   };
 };
+
+async function updateQRCodes(allQrCodes) {
+  // const allQrCodes = [...]; // Replace with your actual array of QR codes
+
+  for (const element of allQrCodes) {
+    console.log("element ", element);
+    const element_qr_available_meals = element.qr_available_meals;
+    const element_total_meals = element.total_meals;
+
+    // Use await inside an async function
+    await QRCardModel.findByIdAndUpdate(
+      { _id: element.toString() },
+      {
+        qr_available_meals: element_qr_available_meals,
+        total_meals: element_total_meals,
+      },
+      { new: true }
+    );
+  }
+}
 
 module.exports = { webhookCall };

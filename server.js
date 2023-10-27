@@ -1,6 +1,4 @@
-// app.js
 const express = require('express');
-// const mongoose = require('mongoose');`
 const userRoutes = require('./router/userRoute');
 const qrRoutes = require('./router/qrRoute');
 const mealsRoutes = require('./router/mealsRoute');
@@ -13,7 +11,6 @@ const connectDb = require("./connection/dbConnection");
 const bodyParser = require('body-parser')
 
 connectDb();
-
 
 const app = express();
 const port = process.env.PORT || 3000;
