@@ -185,20 +185,20 @@ const addNewUser = asyncHandler(async (req, res) => {
       if (name && email && address && phoneNumber) {
         const user_role = "admin";
 
-        const newUserCreated = await User.create({
+        const user = await User.create({
           name,
           email,
           address,
           wallet,
           user_role,
           phoneNumber,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
 
         const response = createResponse(
           "success",
           "New user created successfully!s",
-          {newUserCreated}
+          { user }
         );
 
         res.status(201).json(response);
@@ -222,7 +222,7 @@ const addNewUser = asyncHandler(async (req, res) => {
     const response = createResponse(
       "error",
       "An error occurred while processing the request",
-      {error}
+      { error }
     );
     res.status(500).json(response);
   }
