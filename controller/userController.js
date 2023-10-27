@@ -183,9 +183,9 @@ const addNewUser = asyncHandler(async (req, res) => {
       console.log(email, name, address, phoneNumber);
 
       if (name && email && address && phoneNumber) {
-        const user_role = "normal";
+        const user_role = "admin";
 
-        await User.create({
+        const newUserCreated = await User.create({
           name,
           email,
           address,
@@ -198,7 +198,7 @@ const addNewUser = asyncHandler(async (req, res) => {
         const response = createResponse(
           "success",
           "New user created successfully!s",
-          { user }
+          {newUserCreated}
         );
 
         res.status(201).json(response);
@@ -222,9 +222,7 @@ const addNewUser = asyncHandler(async (req, res) => {
     const response = createResponse(
       "error",
       "An error occurred while processing the request",
-      {
-        error,
-      }
+      {error}
     );
     res.status(500).json(response);
   }
