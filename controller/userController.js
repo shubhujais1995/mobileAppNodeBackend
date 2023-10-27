@@ -29,6 +29,7 @@ const sendOTP = asyncHandler(async (req, res) => {
   } else {
     const user = await User.create({
       phoneNumber,
+      user_role:"normal",
       otp,
       timestamp: Date.now(),
     });
@@ -51,13 +52,13 @@ const verifyOtp = async (req, res) => {
       Date.now() - new Date(user.updatedAt).getTime() <= 60000;
 
     if (otp == user.otp && isTimestampValid) {
-      if (user.name || user.email || user.address) {
+      if (user.name || user.email || user.address || user.user_role) {
         const accessToken = jwt.sign(
           {
             user: {
               name: user.name,
               email: user.email,
-              user_role:"normal",
+              user_role: user.user_role,
               id: String(user._id),
             },
           },
@@ -77,7 +78,7 @@ const verifyOtp = async (req, res) => {
         const accessToken = jwt.sign(
           {
             user: {
-              user_role:"normal",
+              user_role: "normal",
               id: String(user._id),
             },
           },
