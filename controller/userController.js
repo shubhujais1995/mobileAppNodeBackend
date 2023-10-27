@@ -185,11 +185,15 @@ const addNewUser = asyncHandler(async (req, res) => {
       if (name && email && address && phoneNumber) {
         const user_role = "normal";
 
-        await User.findByIdAndUpdate(
-          { _id: userId },
-          { name, email, address, wallet, user_role, phoneNumber },
-          { new: true }
-        );
+        await User.create({
+          name,
+          email,
+          address,
+          wallet,
+          user_role,
+          phoneNumber,
+          timestamp: Date.now()
+        });
 
         const response = createResponse(
           "success",
