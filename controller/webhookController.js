@@ -77,7 +77,7 @@ const webhookCall = asyncHandler(async (req, res) => {
 
     if (orderDetail) {
       if (orderDetail.status !== "captured") {
-        if (orderDetail.divideToAllCards) {
+        if (orderDetail.divide_to_all_card) {
           // console.log("Do devide to all qrs.");
 
           // Fetch documents where the 'code' field is in the provided array

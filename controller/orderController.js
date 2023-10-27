@@ -4,7 +4,7 @@ const axios = require("axios");
 
 const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
   try {
-    const { amount, currency, divideToAllCards, qr_id } = req.body;
+    const { amount, currency, divide_to_all_card, qr_id } = req.body;
 
     if (!amount || !currency || !qr_id) {
       res.status(400);
@@ -35,7 +35,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
       method: "card",
       amount: responseData.amount,
       user_id: req.user.id,
-      divideToAllCards: divideToAllCards, 
+      divide_to_all_card: divide_to_all_card, 
       qr_id:qr_id
     };
 
