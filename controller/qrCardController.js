@@ -105,7 +105,7 @@ const redeemQr = asyncHandler(async (req, res) => {
   if (currentUserRole != "admin") {
     const response = createResponse(
       "error",
-      "You are not autherized to add user!",
+      "You are not autherized redeem meals!",
       null
     );
     res.status(401).json(response);
