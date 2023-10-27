@@ -69,7 +69,7 @@ const verifyOtp = async (req, res) => {
         );
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
-        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
+        const response = createResponse("success", "User is already profileUpdated, Otp verified succesfully!", {
           token: accessToken,
           user,
         });
@@ -87,7 +87,7 @@ const verifyOtp = async (req, res) => {
             expiresIn: "1d",
           }
         );
-        const response = createResponse("success", "Otp verified succesfully, Please register the User", {
+        const response = createResponse("success", "Otp verified succesfully, Please profileUpdate the User", {
           token: accessToken,
           user,
         });
@@ -102,8 +102,8 @@ const verifyOtp = async (req, res) => {
 };
 
 // Route for user registration
-// router.post('/register',
-const register = asyncHandler(async (req, res) => {
+// router.post('/profileUpdate',
+const profileUpdate = asyncHandler(async (req, res) => {
   try {
     const userId = req.params.id;
     const allUsers = await User.find();
@@ -213,7 +213,7 @@ function sendOTPToUser(phoneNumber, otp) {
   ); //en d of sendMessage;
 }
 
-module.exports = { sendOTP, register, verifyOtp, getCurrentUser };
+module.exports = { sendOTP, profileUpdate, verifyOtp, getCurrentUser };
 
 // {
 //   "status": true,

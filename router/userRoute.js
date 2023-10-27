@@ -2,11 +2,11 @@ const express = require("express");
 const router = express.Router();
 const validateToken = require("../middleware/validateTokenHandler");
 
-const { sendOTP, verifyOtp, register, getCurrentUser } = require('../controller/userController');
+const { sendOTP, verifyOtp, profileUpdate, getCurrentUser } = require('../controller/userController');
 
 router.post('/send-otp', sendOTP);
 
-router.post('/register/:id', validateToken, register)
+router.post('/profileUpdate/:id', validateToken, profileUpdate)
 
 router.post('/verify-otp', verifyOtp)
 
