@@ -7,7 +7,7 @@ const qrCardShema = mongoose.Schema(
       required: true,
       ref: "User",
     },
-    qr_id: { type: String,unique: true, required: true },
+    qr_id: { type: String, unique: true, required: true },
     qr_display_name: { type: String, required: true },
     qr_code: { type: String, unique: true, required: true },
     qr_status: { type: Boolean, required: true },
