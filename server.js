@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req, res) => {
-    res.send({"message": "Deployed : Smiles again :-)!"});
+    res.send({"message": "Deployed :::::: Smiles again :-)!"});
 })
 
 // app.post('/api/qr/add-qr', (rq, res) => {
