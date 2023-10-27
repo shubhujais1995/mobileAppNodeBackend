@@ -33,9 +33,7 @@ const addMeal = asyncHandler(async (req, res) => {
   console.log(updatedDocuments);
 
   // Send response to the client
-  const response = createResponse("success", "Meals Updated Successfully!", {
-    updatedDocuments,
-  });
+  const response = createResponse("success", "Meals Updated Successfully!", null);
 
   res.status(200).json(response);
 
