@@ -5,26 +5,24 @@ const FBTOKEN = require("../model/firebaseTokenModel");
 const addFbToken = asyncHandler(async (req, res) => {
 
   const { firebaseToken } = req.body;
-    console.log(firebaseToken);
+  console.log(firebaseToken);
 
   if (!firebaseToken) {
-    res.status(404);
-    throw new Error("firebaseToken not found");
+    res.status(400);
+    throw new Error("All fields are required!");
   }
 
     const ft = await FBTOKEN.create({ firebaseToken });
-
-    const response = createResponse(201, {
-      message: "Token added Successfully!",
-      ft,
-    });
+    console.log(ft);
+    const response = createResponse("success", "Token added Successfully!", null);
 
     res.status(201).json(response);
-//   }
+
 });
-const createResponse = (status, data) => {
+const createResponse = (status, message, data) => {
   return {
     status,
+    message,
     data,
   };
 };

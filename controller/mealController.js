@@ -33,12 +33,11 @@ const addMeal = asyncHandler(async (req, res) => {
   console.log(updatedDocuments);
 
   // Send response to the client
-  const response = createResponse(201, {
-    message: "Meals Updated Successfully!",
+  const response = createResponse("success", "Meals Updated Successfully!", {
     updatedDocuments,
   });
 
-  res.status(201).json(response);
+  res.status(200).json(response);
 
   // if ( !qr_id || !meals ) {
   //   res.status(400);
@@ -95,9 +94,10 @@ const addMeal = asyncHandler(async (req, res) => {
 // });
 
 // Function to create a standardized response format
-const createResponse = (status, data) => {
+const createResponse = (status, message, data) => {
   return {
     status,
+    message,
     data,
   };
 };

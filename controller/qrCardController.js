@@ -19,8 +19,6 @@ const addQR = asyncHandler(async (req, res) => {
     !qr_id ||
     !qr_display_name ||
     !qr_code ||
-    !total_meals ||
-    !qr_available_meals ||
     !qr_app ||
     !qr_status
   ) {
@@ -55,7 +53,7 @@ const updateQR = asyncHandler(async (req, res) => {
   }
 
   if (qr.user_id.toString() !== req.user.id) {
-    res.status(404);
+    res.status(401);
     throw new Error("User don't have permission to update other user contacts");
   }
 
