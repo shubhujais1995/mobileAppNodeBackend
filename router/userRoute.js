@@ -12,6 +12,6 @@ router.post('/verify-otp', verifyOtp);
 
 router.get('/current/:id', validateToken,  getCurrentUser);
 
-router.get('/addNewUser', validateToken, addNewUser);
+router.post('/addNewUser', validateToken, addNewUser);
 
 module.exports = router;

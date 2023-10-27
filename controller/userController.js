@@ -178,16 +178,16 @@ const addNewUser = asyncHandler(async (req, res) => {
     const currentUserRole = req.user.user_role;
 
     if (currentUserRole == "super_admin") {
-      const { name, email, address, wallet = 0 } = req.body;
+      const { name, email, address, wallet = 0, phoneNumber } = req.body;
 
-      console.log(email, name, address);
+      console.log(email, name, address, phoneNumber);
 
-      if (name && email && address) {
+      if (name && email && address && phoneNumber) {
         const user_role = "normal";
 
         await User.findByIdAndUpdate(
           { _id: userId },
-          { name, email, address, wallet, user_role },
+          { name, email, address, wallet, user_role, phoneNumber },
           { new: true }
         );
 
