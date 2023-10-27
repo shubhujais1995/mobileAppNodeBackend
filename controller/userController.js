@@ -129,11 +129,11 @@ const register = asyncHandler(async (req, res) => {
           expiresIn: "1d",
         }
       );
-
+      const user_role = "normal";
       res.setHeader("Authorization", `Bearer ${accessToken}`);
       await User.findByIdAndUpdate(
         { _id: userId },
-        { $set: req.body },
+        { name, email, address, wallet, user_role },
         { new: true }
       );
 
