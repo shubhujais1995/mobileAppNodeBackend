@@ -100,32 +100,46 @@ const fetchQRList = asyncHandler(async (req, res) => {
 });
 
 const redeemQr = asyncHandler(async (req, res) => {
-  const { qr_id } = req.body;
 
-  const qrDetail = await QRCard.find({ qr_id });
-
-  if (!qrDetail) {
-    res.status(404);
-    throw new Error("Please provide valid QR Id!");
+  const currentUserRole = req.user.user_role;
+  if (currentUserRole != "admin") {
+    const response = createResponse(
+      "error",
+      "You are not autherized to add user!",
+      null
+    );
+    res.status(401).json(response);
   } else {
-    if (qrDetail.qr_available_meals < 1) {
+    const { qr_id } = req.body;
+
+    const qrDetail = await QRCard.find({ qr_id });
+
+    console.log(' qrDetail == ', qrDetail);
+
+    if (!qrDetail) {
       res.status(404);
-      throw new Error("Meals are not left in your account!");
+      throw new Error("Please provide valid QR Id!");
     } else {
-      let qr_available_meals = qrDetail.qr_available_meals - 1;
+      if (qrDetail.qr_available_meals < 1) {
+        res.status(404);
+        throw new Error("Meals are not left in your account!");
+      } else {
+        let qr_available_meals = qrDetail.qr_available_meals - 1;
+        
+        const _id = qrDetail._id.toString();
+        await QRCard.findByIdAndUpdate(
+          { _id },
+          { qr_available_meals },
+          { new: true }
+        );
 
-      await QRCard.findByIdAndUpdate(
-        { _id: qrDetail._id },
-        { qr_available_meals },
-        { new: true }
-      );
-
-      const response = createResponse(
-        "success",
-        "Meal redeem succesfully!",
-        null
-      );
-      res.status(200).json(response);
+        const response = createResponse(
+          "success",
+          "Meal redeem succesfully!",
+          null
+        );
+        res.status(200).json(response);
+      }
     }
   }
 });
