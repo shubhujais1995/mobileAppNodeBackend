@@ -69,7 +69,7 @@ const verifyOtp = async (req, res) => {
         );
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
-        const response = createResponse("success", "User is already profileUpdated, Otp verified succesfully!", {
+        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
           token: accessToken,
           user,
         });
