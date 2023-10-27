@@ -29,7 +29,7 @@ const sendOTP = asyncHandler(async (req, res) => {
   } else {
     const user = await User.create({
       phoneNumber,
-      user_role:"normal",
+      user_role: "normal",
       otp,
       timestamp: Date.now(),
     });
@@ -37,16 +37,16 @@ const sendOTP = asyncHandler(async (req, res) => {
     console.log(user, "user created");
   }
 
-
   const response = createResponse("success", "Otp sent succesfully!", null);
   res.status(200).json(response);
-
 });
 
 const verifyOtp = async (req, res) => {
   const { phoneNumber, otp } = req.body;
   const user = await User.findOne({ phoneNumber });
+
   console.log(user, otp);
+
   if (user) {
     const isTimestampValid =
       Date.now() - new Date(user.updatedAt).getTime() <= 60000;
@@ -69,10 +69,14 @@ const verifyOtp = async (req, res) => {
         );
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
-        const response = createResponse("success", "User is already registered, Otp verified succesfully!", {
-          token: accessToken,
-          user,
-        });
+        const response = createResponse(
+          "success",
+          "User is already registered, Otp verified succesfully!",
+          {
+            token: accessToken,
+            user,
+          }
+        );
         res.status(200).json(response);
       } else {
         const accessToken = jwt.sign(
@@ -87,10 +91,14 @@ const verifyOtp = async (req, res) => {
             expiresIn: "1d",
           }
         );
-        const response = createResponse("success", "Otp verified succesfully, Please profileUpdate the User", {
-          token: accessToken,
-          user,
-        });
+        const response = createResponse(
+          "success",
+          "Otp verified succesfully, Please profileUpdate the User",
+          {
+            token: accessToken,
+            user,
+          }
+        );
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         res.status(200).json(response);
       }
@@ -108,20 +116,20 @@ const profileUpdate = asyncHandler(async (req, res) => {
     const userId = req.params.id;
     const allUsers = await User.find();
     const user = allUsers.find((c) => c.id === userId);
-    
+
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
     const { name, email, address, wallet = 0 } = req.body;
     console.log(email, name, address);
-    if (name && email && address ) {
+    if (name && email && address) {
       const accessToken = jwt.sign(
         {
           user: {
             name: user.name,
             email: user.email,
-            user_role:"normal",
+            user_role: "normal",
             id: String(user._id),
           },
         },
@@ -139,10 +147,14 @@ const profileUpdate = asyncHandler(async (req, res) => {
       );
 
       res.setHeader("Authorization", `Bearer ${accessToken}`);
-      const response = createResponse("success", "User created/updated successfully", {
-        token: accessToken,
-        user
-      });
+      const response = createResponse(
+        "success",
+        "User created/updated successfully",
+        {
+          token: accessToken,
+          user,
+        }
+      );
 
       res.status(200).json(response);
     } else {
@@ -150,9 +162,66 @@ const profileUpdate = asyncHandler(async (req, res) => {
       res.status(400).json(response);
     }
   } catch (error) {
-    const response = createResponse("error", "An error occurred while processing the request", {
-      error,
-    });
+    const response = createResponse(
+      "error",
+      "An error occurred while processing the request",
+      {
+        error,
+      }
+    );
+    res.status(500).json(response);
+  }
+});
+
+const addNewUser = asyncHandler(async (req, res) => {
+  try {
+    const currentUserRole = req.user.user_role;
+
+    if (currentUserRole == "super_admin") {
+      const { name, email, address, wallet = 0 } = req.body;
+
+      console.log(email, name, address);
+
+      if (name && email && address) {
+        const user_role = "normal";
+
+        await User.findByIdAndUpdate(
+          { _id: userId },
+          { name, email, address, wallet, user_role },
+          { new: true }
+        );
+
+        const response = createResponse(
+          "success",
+          "New user created successfully!s",
+          { user }
+        );
+
+        res.status(201).json(response);
+      } else {
+        const response = createResponse(
+          "error",
+          "All fields are required",
+          null
+        );
+        res.status(400).json(response);
+      }
+    } else {
+      const response = createResponse(
+        "error",
+        "You are not autherized to add user!",
+        null
+      );
+      res.status(401).json(response);
+    }
+  } catch (error) {
+    const response = createResponse(
+      "error",
+      "An error occurred while processing the request",
+      {
+        error,
+      }
+    );
     res.status(500).json(response);
   }
 });
@@ -173,10 +242,10 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     address: user.address,
     email: user.email,
     role: user.user_role,
-    wallet: user.wallet
+    wallet: user.wallet,
   };
 
-  const response = createResponse("success",  "Current User Info", obj);
+  const response = createResponse("success", "Current User Info", obj);
 
   res.status(200).json(response);
 });
@@ -213,7 +282,13 @@ function sendOTPToUser(phoneNumber, otp) {
   ); //en d of sendMessage;
 }
 
-module.exports = { sendOTP, profileUpdate, verifyOtp, getCurrentUser };
+module.exports = {
+  sendOTP,
+  profileUpdate,
+  verifyOtp,
+  getCurrentUser,
+  addNewUser,
+};
 
 // {
 //   "status": true,
