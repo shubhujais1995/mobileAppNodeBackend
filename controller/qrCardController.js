@@ -112,26 +112,32 @@ const redeemQr = asyncHandler(async (req, res) => {
   } else {
     const { qr_id } = req.body;
 
-    const qrDetail = await QRCard.find({ qr_id });
-
+    const qrDetails = await QRCard.find({ qr_id });
+    const qrDetail = qrDetails[0];
     console.log(' qrDetail == ', qrDetail);
 
     if (!qrDetail) {
+      console.log("qrDetail came in error");
       res.status(404);
       throw new Error("Please provide valid QR Id!");
     } else {
+      console.log("came in else");
       if (qrDetail.qr_available_meals < 1) {
+        console.log("came in 404");
         res.status(404);
         throw new Error("Meals are not left in your account!");
       } else {
+        console.log("qr_available_meals", qrDetail.qr_available_meals);
         let qr_available_meals = qrDetail.qr_available_meals - 1;
-        
         const _id = qrDetail._id.toString();
+        console.log(_id);
+        console.log(qr_available_meals);
         await QRCard.findByIdAndUpdate(
           { _id },
           { qr_available_meals },
           { new: true }
         );
+        console.log("updated")
 
         const response = createResponse(
           "success",
