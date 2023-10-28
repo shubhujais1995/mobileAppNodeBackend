@@ -99,8 +99,26 @@ const fetchQRList = asyncHandler(async (req, res) => {
   }
 });
 
-const redeemQr = asyncHandler(async (req, res) => {
+const getQrById = asyncHandler(async (req, res) => {
+  
+  const qr_id = req.id;
 
+  const qrDetail = await QRCard.find({ qr_id });
+
+  if (!qrDetail) {
+    res.send(404);
+    throw new Error("Please provide valid Qr id");
+  } else {
+    const response = createResponse(
+      "success",
+      "QR Detail fetched succesfully!",
+      qrDetail
+    );
+    res.status(200).json(response);
+  }
+});
+
+const redeemQr = asyncHandler(async (req, res) => {
   const currentUserRole = req.user.user_role;
   if (currentUserRole != "admin") {
     const response = createResponse(
@@ -114,7 +132,7 @@ const redeemQr = asyncHandler(async (req, res) => {
 
     const qrDetails = await QRCard.find({ qr_id });
     const qrDetail = qrDetails[0];
-    console.log(' qrDetail == ', qrDetail);
+    console.log(" qrDetail == ", qrDetail);
 
     if (!qrDetail) {
       console.log("qrDetail came in error");
@@ -137,7 +155,7 @@ const redeemQr = asyncHandler(async (req, res) => {
           { qr_available_meals },
           { new: true }
         );
-        console.log("updated")
+        console.log("updated");
 
         const response = createResponse(
           "success",
@@ -157,4 +175,4 @@ const createResponse = (status, message, data) => {
     data,
   };
 };
-module.exports = { addQR, updateQR, fetchQRList, redeemQr };
+module.exports = { addQR, updateQR, fetchQRList, redeemQr, getQrById };
