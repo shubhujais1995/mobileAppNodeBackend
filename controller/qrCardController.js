@@ -100,22 +100,44 @@ const fetchQRList = asyncHandler(async (req, res) => {
 });
 
 const getQrById = asyncHandler(async (req, res) => {
-  console.log(req);
+  // console.log(req);
   const qr_id = req.params.id;
-  console.log(qr_id);
-  
-  const qrDetail = await QRCard.find({ qr_id });
-  console.log(qrDetail);
-  if (!qrDetail) {
-    res.send(404);
-    throw new Error("Please provide valid Qr id");
+  const user_id = req.user.id;
+  // console.log(qr_id);
+  const userRole = req.user.user_role;
+  console.log(user_id, userRole);
+  if (userRole == "super_admin") {
+    const qrDetail = await QRCard.find({ qr_id });
+    if (!qrDetail) {
+      res.send(404);
+      throw new Error("Please provide valid Qr id");
+    } else {
+      const response = createResponse(
+        "success",
+        "QR Detail fetched succesfully!",
+        qrDetail
+      );
+      res.status(200).json(response);
+    }
   } else {
-    const response = createResponse(
-      "success",
-      "QR Detail fetched succesfully!",
-      qrDetail
-    );
-    res.status(200).json(response);
+    const qrDetail = await QRCard.find({ qr_id });
+    if (!qrDetail) {
+      res.send(404);
+      throw new Error("Please provide valid Qr id");
+    } else {
+      const qrUserId = qrDetail[0].user_id.toString();
+      if (qrUserId !== user_id) {
+        res.send(404);
+        throw new Error("You are not authorized to fetch other's QR Detail");
+      } else {
+        const response = createResponse(
+          "success",
+          "QR Detail fetched succesfully!",
+          qrDetail
+        );
+        res.status(200).json(response);
+      }
+    }
   }
 });
 
