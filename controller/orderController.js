@@ -61,6 +61,32 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
   }
 });
 
+const getTransactionByOrderId = asyncHandler(async (req, res) => {
+  
+  const orderId = req.params.id;
+  const orderDetail = await Order.find({ orderId });
+
+  if(!orderDetail) {
+    const response = createResponse(
+      "error",
+      "You are not authorized to fetch other's transaction!",
+      null
+    );
+    res.status(401).json(response);
+  } else {
+    
+    const transactionListByOrderId = orderDetail.filter((order) => order.status !== "created");
+    const response = createResponse(
+      "success",
+      "Transactions fetched succesfully!",
+      transactionListByOrderId
+    );
+    
+    res.status(200).json(response);
+  }
+
+}); 
+
 const getAllTransactions = asyncHandler(async (req, res) => {
 
   const user_id = req.user.id;
@@ -169,4 +195,4 @@ const createResponse = (status, message, data) => {
   };
 };
 
-module.exports = { AddOrderGetPaymentId, getAllTransactions };
+module.exports = { AddOrderGetPaymentId, getAllTransactions, getTransactionByOrderId };

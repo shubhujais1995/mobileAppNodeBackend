@@ -5,4 +5,5 @@ const { AddOrderGetPaymentId, getAllTransactions } = require('../controller/orde
 
 router.post('/getPaymentId', validateToken, AddOrderGetPaymentId);
 router.get('/getAllTransactions', validateToken, getAllTransactions);
+router.get('/getTransactionByOrderId/:id', validateToken, getTransactionByOrderId);
 module.exports = router;
