@@ -100,8 +100,8 @@ const fetchQRList = asyncHandler(async (req, res) => {
 });
 
 const getQrById = asyncHandler(async (req, res) => {
-  
-  const qr_id = req.id;
+
+  const qr_id = req.params.id;
 
   const qrDetail = await QRCard.find({ qr_id });
 

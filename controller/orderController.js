@@ -61,6 +61,27 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllTransactions = asyncHandler(async (req, res) => {
+
+  const user_id = req.user.id;
+  const orders = await Order.find({user_id});
+
+  if(orders) {
+    res.send(404);
+    throw new Error("No transaction found for you!");
+  } else {
+    
+    const response = createResponse(
+      "success",
+      "Transactions fetched succesfully!",
+      orders
+    );
+    
+    res.status(200).json(response);
+  }
+
+});
+
 // function makeRequest(url, method, data) {
 //   const options = {
 //     method: method,
@@ -143,4 +164,4 @@ const createResponse = (status, message, data) => {
   };
 };
 
-module.exports = { AddOrderGetPaymentId };
+module.exports = { AddOrderGetPaymentId, getAllTransactions };
