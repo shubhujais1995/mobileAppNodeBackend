@@ -65,11 +65,11 @@ const getTransactionByOrderId = asyncHandler(async (req, res) => {
   
   const orderId = req.params.id;
   const orderDetail = await Order.find({ orderId });
-
-  if(!orderDetail) {
+  console.log(orderDetail);
+  if(!orderDetail.length) {
     const response = createResponse(
       "error",
-      "You are not authorized to fetch other's transaction!",
+      "You are not authorized to fetch other's transaction, Please provide valid QR Id!",
       null
     );
     res.status(401).json(response);

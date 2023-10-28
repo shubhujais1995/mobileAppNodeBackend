@@ -109,7 +109,7 @@ const getQrById = asyncHandler(async (req, res) => {
   const userRole = req.user.user_role;
   if (userRole == "super_admin") {
     const qrDetail = await QRCard.find({ qr_id });
-    if (!qrDetail) {
+    if (!qrDetail.length) {
       res.send(404);
       throw new Error("Please provide valid Qr id");
     } else {
