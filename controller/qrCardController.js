@@ -47,8 +47,12 @@ const updateQR = asyncHandler(async (req, res) => {
   }
 
   if (qr.user_id.toString() !== req.user.id) {
-    res.status(401);
-    throw new Error("User don't have permission to update other user contacts");
+    const response = createResponse(
+      "error",
+      "You are not authorized to update other's QR!",
+      null
+    );
+    res.status(401).json(response);
   }
 
   if (qr_status == false) {
@@ -127,8 +131,12 @@ const getQrById = asyncHandler(async (req, res) => {
     } else {
       const qrUserId = qrDetail[0].user_id.toString();
       if (qrUserId !== user_id) {
-        res.send(404);
-        throw new Error("You are not authorized to fetch other's QR Detail");
+        const response = createResponse(
+          "error",
+          "You are not authorized to fetch other's QR Detail!",
+          null
+        );
+        res.status(401).json(response);
       } else {
         const response = createResponse(
           "success",
