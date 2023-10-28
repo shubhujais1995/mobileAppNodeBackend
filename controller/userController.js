@@ -235,26 +235,32 @@ const addNewUser = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
 
   const userRole = req.user.user_role;
-  const userId = req.params.id;
-  const allUsers = await User.find();
-  const user = allUsers.find((c) => c.id === userId);
+  const _id = req.user.id;
+  const userDetails = await User.find({_id});
+  const user = userDetails[0];
+  console.log(user);
+  // console.log(userRole, _id, user);
+  // console.log('wait');
+  // const user = allUsers.find((c) => c.id === userId);
 
   const allQRList = await QRCardModel.find();
   const allorders = await OrdersModel.find();
-
+  // console.log(' all ' ,allQRList, allorders);
   const totalTransactionList = allorders.length;
   const totalActiveQr = allQRList.filter((qr) => qr.qr_status == true).length;
   const totalDeactiveQr = allQRList.filter((qr) => qr.qr_status == false).length;
+
+  // console.log( ' total -', totalActiveQr, totalDeactiveQr, totalTransactionList);
 
   if (!user) {
     res.status(404);
     throw new Error("User not found");
   }
-  let obj;
+  let userDetail;
   if (userRole == 'super_admin') {
-    obj = {
+    userDetail = {
       name: user.name,
-      phone: user.phone,
+      phone: user.phoneNumber,
       address: user.address,
       email: user.email,
       role: user.user_role,
@@ -264,17 +270,17 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       noOfTransaction: totalTransactionList
     };
   } else {
-    obj = {
+    userDetail = {
       name: user.name,
-      phone: user.phone,
+      phone: user.phoneNumber,
       address: user.address,
       email: user.email,
       role: user.user_role,
       wallet: user.wallet,
     };
   }
-  
-  const response = createResponse("success", "Current User Info", obj);
+  // console.log(userDetail);
+  const response = createResponse("success", "Current User Info", { user: userDetail });
 
   res.status(200).json(response);
 });

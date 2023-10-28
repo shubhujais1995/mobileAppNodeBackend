@@ -10,7 +10,7 @@ router.post('/profileUpdate/:id', validateToken, profileUpdate);
 
 router.post('/verify-otp', verifyOtp);
 
-router.get('/current/:id', validateToken,  getCurrentUser);
+router.get('/current', validateToken,  getCurrentUser);
 
 router.post('/addNewUser', validateToken, addNewUser);
 
