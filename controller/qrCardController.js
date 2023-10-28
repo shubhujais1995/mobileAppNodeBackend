@@ -100,11 +100,12 @@ const fetchQRList = asyncHandler(async (req, res) => {
 });
 
 const getQrById = asyncHandler(async (req, res) => {
-
+  console.log(req);
   const qr_id = req.params.id;
-
+  console.log(qr_id);
+  
   const qrDetail = await QRCard.find({ qr_id });
-
+  console.log(qrDetail);
   if (!qrDetail) {
     res.send(404);
     throw new Error("Please provide valid Qr id");

@@ -10,7 +10,7 @@ router.post('/add-qr', validateToken, addQR);
 router.post('/update-qr/:id', validateToken, updateQR);
 router.get('/qr-list', validateToken,  fetchQRList);
 router.post('/redeemQr', validateToken,  redeemQr);
-router.get('/getQrById', validateToken, getQrById);
+router.get('/getQrById/:id', validateToken , getQrById);
 // router.post('/add-qr',  addQR);
 // router.post('/update-qr/:id', updateQR);
 // router.get('/qr-list',  fetchQRList)
