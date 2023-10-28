@@ -65,10 +65,14 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 
   const user_id = req.user.id;
   const orders = await Order.find({user_id});
-
-  if(orders) {
-    res.send(404);
-    throw new Error("No transaction found for you!");
+  
+  if(!orders) {
+    const response = createResponse(
+      "error",
+      "You are not authorized to fetch other's transaction!",
+      null
+    );
+    res.status(401).json(response);
   } else {
     
     const response = createResponse(

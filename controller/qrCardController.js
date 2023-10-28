@@ -104,12 +104,9 @@ const fetchQRList = asyncHandler(async (req, res) => {
 });
 
 const getQrById = asyncHandler(async (req, res) => {
-  // console.log(req);
   const qr_id = req.params.id;
   const user_id = req.user.id;
-  // console.log(qr_id);
   const userRole = req.user.user_role;
-  console.log(user_id, userRole);
   if (userRole == "super_admin") {
     const qrDetail = await QRCard.find({ qr_id });
     if (!qrDetail) {
