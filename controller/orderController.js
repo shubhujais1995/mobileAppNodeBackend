@@ -65,7 +65,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
 
   const user_id = req.user.id;
   const orders = await Order.find({user_id});
-  
+
   if(!orders) {
     const response = createResponse(
       "error",
@@ -75,10 +75,11 @@ const getAllTransactions = asyncHandler(async (req, res) => {
     res.status(401).json(response);
   } else {
     
+    const transactionList = orders.filter((order) => order.status !== "created");
     const response = createResponse(
       "success",
       "Transactions fetched succesfully!",
-      orders
+      transactionList
     );
     
     res.status(200).json(response);
