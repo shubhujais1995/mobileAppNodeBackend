@@ -88,7 +88,9 @@ const updateQR = asyncHandler(async (req, res) => {
 });
 
 const fetchQRList = asyncHandler(async (req, res) => {
-  const allQRs = await QRCard.find();
+
+  const user_id = req.user.id;
+  const allQRs = await QRCard.find({user_id});
 
   if (!allQRs.length) {
     const response = createResponse("success", "QR List is found empty!", null);
