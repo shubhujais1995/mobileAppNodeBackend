@@ -112,7 +112,7 @@ const verifyOtp = async (req, res) => {
     }
   }
 };
-
+const refreshTokens = {};
 // Route for user registration
 // router.post('/profileUpdate',
 const profileUpdate = asyncHandler(async (req, res) => {
@@ -128,6 +128,22 @@ const profileUpdate = asyncHandler(async (req, res) => {
     const { name, email, address, wallet = 0 } = req.body;
     console.log(email, name, address);
     if (name && email && address) {
+      // const accessToken = jwt.sign(
+      //   {
+      //     user: {
+      //       name: user.name,
+      //       email: user.email,
+      //       user_role: "normal",
+      //       id: String(user._id),
+      //     },
+      //   },
+      //   process.env.ACCESS_TOKEN_SECRET,
+      //   {
+      //     expiresIn: "1d",
+      //   }
+      // );
+      // const user_role = "normal";
+
       const accessToken = jwt.sign(
         {
           user: {
@@ -142,8 +158,31 @@ const profileUpdate = asyncHandler(async (req, res) => {
           expiresIn: "1d",
         }
       );
-      const user_role = "normal";
+
+      // Generate a refresh token
+      const refreshToken = jwt.sign(
+        {
+          user: {
+            name: user.name,
+            email: user.email,
+            user_role: "normal",
+            id: String(user._id),
+          },
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "1d",
+        },
+        secretKey
+      );
+
+      // Store the refresh token associated with the user ID (use a database in production)
+      refreshTokens[user._id] = refreshToken;
+
+      // return res.json({ accessToken, refreshToken });
+
       res.setHeader("Authorization", `Bearer ${accessToken}`);
+
       await User.findByIdAndUpdate(
         { _id: userId },
         { name, email, address, wallet, user_role },
@@ -156,6 +195,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
         "User created/updated successfully",
         {
           token: accessToken,
+          refreshToken: refreshToken,
           user,
         }
       );
@@ -233,10 +273,9 @@ const addNewUser = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-
   const userRole = req.user.user_role;
   const _id = req.user.id;
-  const userDetails = await User.find({_id});
+  const userDetails = await User.find({ _id });
   const user = userDetails[0];
   console.log(user);
   // console.log(userRole, _id, user);
@@ -248,7 +287,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   // console.log(' all ' ,allQRList, allorders);
   const totalTransactionList = allorders.length;
   const totalActiveQr = allQRList.filter((qr) => qr.qr_status == true).length;
-  const totalDeactiveQr = allQRList.filter((qr) => qr.qr_status == false).length;
+  const totalDeactiveQr = allQRList.filter(
+    (qr) => qr.qr_status == false
+  ).length;
 
   // console.log( ' total -', totalActiveQr, totalDeactiveQr, totalTransactionList);
 
@@ -257,7 +298,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     throw new Error("User not found");
   }
   let userDetail;
-  if (userRole == 'super_admin') {
+  if (userRole == "super_admin") {
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -267,7 +308,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       wallet: user.wallet,
       noOfActiveQr: totalActiveQr,
       noOfDeactiveQr: totalDeactiveQr,
-      noOfTransaction: totalTransactionList
+      noOfTransaction: totalTransactionList,
     };
   } else {
     userDetail = {
@@ -280,9 +321,45 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     };
   }
   // console.log(userDetail);
-  const response = createResponse("success", "Current User Info", { user: userDetail });
+  const response = createResponse("success", "Current User Info", {
+    user: userDetail,
+  });
 
   res.status(200).json(response);
+});
+
+// Route to refresh the access token using a refresh token
+app.post("/refresh-token", (req, res) => {
+  const refreshToken = req.body.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(403).json({ message: "Invalid refresh token" });
+  }
+
+  // Verify the refresh token
+  jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    const userId = decoded.userId;
+
+    // Check if the user's refresh token is valid (you might want to validate against a stored value)
+    if (!refreshTokens[userId] || refreshTokens[userId] !== refreshToken) {
+      return res.status(403).json({ message: "Invalid refresh token" });
+    }
+
+    // Generate a new access token
+    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+      expiresIn: "1d",
+    });
+
+    // res.json({ accessToken });
+
+    const response = createResponse("success", "Access Token", { accessToken });
+
+    res.status(200).json(response);
+  });
 });
 // Function to create a standardized response format
 const createResponse = (status, message, data) => {
