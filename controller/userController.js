@@ -329,7 +329,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 // Route to refresh the access token using a refresh token
-app.post("/refresh-token", (req, res) => {
+const refreshTokenFun = asyncHandler(async (req, res) => {
   const refreshToken = req.body.refreshToken;
 
   if (!refreshToken) {
@@ -400,6 +400,7 @@ module.exports = {
   verifyOtp,
   getCurrentUser,
   addNewUser,
+  refreshTokenFun
 };
 
 // {
