@@ -179,7 +179,14 @@ const webhookCall = asyncHandler(async (req, res) => {
               { new: true }
             );
 
+
             const userDetailUpdate = await UserModel.find({ _id: userId });
+
+            await Order.findByIdAndUpdate(
+              { _id: orderDetail._id.toString() },
+              { status },
+              { new: true });
+              
             console.log("received after update", userDetailUpdate);
           }
         } else {
@@ -217,6 +224,11 @@ const webhookCall = asyncHandler(async (req, res) => {
             qRCardDetailAfterUpdate
           );
 
+          await Order.findByIdAndUpdate(
+            { _id: orderDetail._id.toString() },
+            { status },
+            { new: true });
+
           const response = createResponse(
             "success",
             "Webhook Api called! and udpate QR amount & meals",
@@ -224,6 +236,9 @@ const webhookCall = asyncHandler(async (req, res) => {
           );
           res.status(200).json(response);
         }
+
+        
+
       } else {
         console.log("orderDetail.status  - Captured");
       }
