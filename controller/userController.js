@@ -83,11 +83,10 @@ const verifyOtp = async (req, res) => {
             id: String(user._id),
           },
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
           expiresIn: "1d",
-        },
-        secretKey
+        }
       );
 
       // Store the refresh token associated with the user ID (use a database in production)
@@ -129,11 +128,10 @@ const verifyOtp = async (req, res) => {
             id: String(user._id),
           },
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
           expiresIn: "1d",
-        },
-        secretKey
+        }
       );
 
       // Store the refresh token associated with the user ID (use a database in production)
@@ -161,32 +159,16 @@ const refreshTokens = {};
 // router.post('/profileUpdate',
 const profileUpdate = asyncHandler(async (req, res) => {
   try {
-    const userId = req.params.id;
-    const allUsers = await User.find();
-    const user = allUsers.find((c) => c.id === userId);
-
+    const _id = req.params.id;
+    const user = await User.findOne({_id});
+    // const user = allUsers.find((c) => c.id === userId);
     if (!user) {
       res.status(404);
       throw new Error("User not found");
     }
-    const { name, email, address, wallet = 0 } = req.body;
-    console.log(email, name, address);
+    const { name, email, address, wallet = 0, user_role = "normal" } = req.body;
+    // console.log(email, name, address);
     if (name && email && address) {
-      // const accessToken = jwt.sign(
-      //   {
-      //     user: {
-      //       name: user.name,
-      //       email: user.email,
-      //       user_role: "normal",
-      //       id: String(user._id),
-      //     },
-      //   },
-      //   process.env.ACCESS_TOKEN_SECRET,
-      //   {
-      //     expiresIn: "1d",
-      //   }
-      // );
-      // const user_role = "normal";
 
       const accessToken = jwt.sign(
         {
@@ -213,22 +195,20 @@ const profileUpdate = asyncHandler(async (req, res) => {
             id: String(user._id),
           },
         },
-        process.env.ACCESS_TOKEN_SECRET,
+        process.env.REFRESH_TOKEN_SECRET,
         {
           expiresIn: "1d",
-        },
-        secretKey
+        }
       );
-
+        console.log( 'a ', accessToken,' r ' ,refreshToken);
       // Store the refresh token associated with the user ID (use a database in production)
       refreshTokens[user._id] = refreshToken;
-
+        console.log("ref", refreshTokens);
       // return res.json({ accessToken, refreshToken });
 
-      // res.setHeader("Authorization", `Bearer ${accessToken}`);
-
+      res.setHeader("Authorization", `Bearer ${accessToken}`);
       await User.findByIdAndUpdate(
-        { _id: userId },
+        { _id },
         { name, email, address, wallet, user_role },
         { new: true }
       );
@@ -381,7 +361,7 @@ const refreshTokenFun = asyncHandler(async (req, res) => {
   }
 
   // Verify the refresh token
-  jwt.verify(refreshToken, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
     if (err) {
       return res.status(403).json({ message: "Invalid refresh token" });
     }
