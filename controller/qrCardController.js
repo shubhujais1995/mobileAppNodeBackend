@@ -1,5 +1,3 @@
-const express = require("express");
-const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const QRCard = require("../model/qaCardModel");
 const User = require("../model/userModel");
@@ -16,8 +14,11 @@ const addQR = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (!qr_id || !qr_display_name || !qr_code || !qr_app || !qr_status) {
-    res.status(400);
-    throw new Error("All fields are mandatory");
+    // res.status(400);
+    // throw new Error("All fields are mandatory");
+
+    const response = createResponse("error", "All fields are mandatory", null);
+    res.status(200).json(response);
   }
 
   const qr = await QRCard.create({
@@ -88,9 +89,8 @@ const updateQR = asyncHandler(async (req, res) => {
 });
 
 const fetchQRList = asyncHandler(async (req, res) => {
-
   const user_id = req.user.id;
-  const allQRs = await QRCard.find({user_id});
+  const allQRs = await QRCard.find({ user_id });
 
   if (!allQRs.length) {
     const response = createResponse("success", "QR List is found empty!", null);
@@ -112,8 +112,16 @@ const getQrById = asyncHandler(async (req, res) => {
   if (userRole == "super_admin" || userRole == "admin") {
     const qrDetail = await QRCard.find({ qr_id });
     if (!qrDetail.length) {
-      res.send(404);
-      throw new Error("Please provide valid Qr id");
+      // res.send(404);
+      // throw new Error("Please provide valid Qr id");
+
+      const response = createResponse(
+        "error",
+        "Please provide valid Qr id",
+        null
+      );
+
+      res.status(200).json(response);
     } else {
       const response = createResponse(
         "success",
@@ -125,8 +133,16 @@ const getQrById = asyncHandler(async (req, res) => {
   } else {
     const qrDetail = await QRCard.find({ qr_id });
     if (!qrDetail) {
-      res.send(404);
-      throw new Error("Please provide valid Qr id");
+      // res.send(404);
+      // throw new Error("Please provide valid Qr id");
+
+      const response = createResponse(
+        "error",
+        "Please provide valid Qr id",
+        null
+      );
+
+      res.status(200).json(response);
     } else {
       const qrUserId = qrDetail[0].user_id.toString();
       if (qrUserId !== user_id) {
@@ -172,14 +188,17 @@ const redeemQr = asyncHandler(async (req, res) => {
       console.log("came in else");
       if (qrDetail.qr_available_meals < 1) {
         console.log("came in 404");
-        res.status(404);
-        throw new Error("Meals are not left in your account!");
+        // res.status(404);
+        // throw new Error("Meals are not left in your account!");
+        const response = createResponse(
+          "success",
+          "Meals are not left in your account!",
+          null
+        );
+        res.status(200).json(response);
       } else {
-        console.log("qr_available_meals", qrDetail.qr_available_meals);
         let qr_available_meals = qrDetail.qr_available_meals - 1;
         const _id = qrDetail._id.toString();
-        console.log(_id);
-        console.log(qr_available_meals);
         await QRCard.findByIdAndUpdate(
           { _id },
           { qr_available_meals },
@@ -192,6 +211,7 @@ const redeemQr = asyncHandler(async (req, res) => {
           "Meal redeem succesfully!",
           null
         );
+
         res.status(200).json(response);
       }
     }

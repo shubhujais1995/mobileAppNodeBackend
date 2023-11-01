@@ -1,4 +1,3 @@
-const express = require("express");
 const asyncHandler = require("express-async-handler");
 const FBTOKEN = require("../model/firebaseTokenModel");
 
@@ -8,8 +7,11 @@ const addFbToken = asyncHandler(async (req, res) => {
   console.log(firebaseToken);
 
   if (!firebaseToken) {
-    res.status(400);
-    throw new Error("All fields are required!");
+    // res.status(400);
+    // throw new Error("All fields are required!");
+    const response = createResponse("error", "All fields are mandatory", null);
+    res.status(200).json(response);
+
   }
 
     const ft = await FBTOKEN.create({ firebaseToken });

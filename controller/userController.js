@@ -1,4 +1,3 @@
-const express = require("express");
 const asyncHandler = require("express-async-handler");
 const User = require("../model/userModel");
 const QRCardModel = require("../model/qaCardModel");
@@ -6,7 +5,6 @@ const OrdersModel = require("../model/orderModel");
 
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
-const orderModel = require("../model/orderModel");
 const AccessToken = require("twilio/lib/jwt/AccessToken");
 const twilio = require("twilio")(
   process.env.TWILIO_ACCOUNT_SID,
@@ -123,8 +121,15 @@ const profileUpdate = asyncHandler(async (req, res) => {
     const user = await User.findOne({_id});
     // const user = allUsers.find((c) => c.id === userId);
     if (!user) {
-      res.status(404);
-      throw new Error("User not found");
+      // res.status(404);
+      // throw new Error("User not found");
+
+      const response = createResponse(
+        "error",
+        "User Not Found!",
+        null
+      );
+      res.status(200).json(response);
     }
     const { name, email, address, wallet = 0, user_role = "normal" } = req.body;
     console.log(email, name, address, user_role);
@@ -255,8 +260,14 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   // console.log( ' total -', totalActiveQr, totalDeactiveQr, totalTransactionList);
 
   if (!user) {
-    res.status(404);
-    throw new Error("User not found");
+    // res.status(404);
+    // throw new Error("User not found");
+    const response = createResponse(
+      "error",
+      "User Not Found!",
+      null
+    );
+    res.status(200).json(response);
   }
   let userDetail;
   if (userRole == "super_admin") {

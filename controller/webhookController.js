@@ -44,8 +44,14 @@ const webhookCall = asyncHandler(async (req, res) => {
     !order_id ||
     !account_id
   ) {
-    res.status(400);
-    throw new Error("All fields are mandatory");
+    // res.status(400);
+    // throw new Error("All fields are mandatory");
+    const response = createResponse(
+      "error",
+      "All fields are mandatory!",
+      null
+    );
+    res.status(200).json(response);
   }
 
   const mealCreated = await Webhook.create({
