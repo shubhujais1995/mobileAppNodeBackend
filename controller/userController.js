@@ -7,6 +7,7 @@ const OrdersModel = require("../model/orderModel");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const orderModel = require("../model/orderModel");
+const AccessToken = require("twilio/lib/jwt/AccessToken");
 const twilio = require("twilio")(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
@@ -48,7 +49,6 @@ const sendOTP = asyncHandler(async (req, res) => {
 const verifyOtp = async (req, res) => {
   const { phoneNumber, otp } = req.body;
   const user = await User.findOne({ phoneNumber });
-
   console.log(user, otp);
 
   if (user) {
@@ -56,6 +56,7 @@ const verifyOtp = async (req, res) => {
       Date.now() - new Date(user.updatedAt).getTime() <= 60000;
 
     if (otp == user.otp && isTimestampValid) {
+      
       if (user.name || user.email || user.address || user.user_role) {
         const accessToken = jwt.sign(
           {
@@ -73,32 +74,12 @@ const verifyOtp = async (req, res) => {
         );
         
 
-      // Generate a refresh token
-      const refreshToken = jwt.sign(
-        {
-          user: {
-            name: user.name,
-            email: user.email,
-            user_role: "normal",
-            id: String(user._id),
-          },
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-          expiresIn: "1d",
-        }
-      );
-
-      // Store the refresh token associated with the user ID (use a database in production)
-      refreshTokens[user._id] = refreshToken;
-
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         const response = createResponse(
           "success",
           "User is already registered, Otp verified succesfully!",
           {
             token: accessToken,
-            refreshToken: refreshToken,
             user,
           }
         );
@@ -117,31 +98,11 @@ const verifyOtp = async (req, res) => {
           }
         );
         
-
-      // Generate a refresh token
-      const refreshToken = jwt.sign(
-        {
-          user: {
-            name: user.name,
-            email: user.email,
-            user_role: "normal",
-            id: String(user._id),
-          },
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-          expiresIn: "1d",
-        }
-      );
-
-      // Store the refresh token associated with the user ID (use a database in production)
-      refreshTokens[user._id] = refreshToken;
         const response = createResponse(
           "success",
           "Otp verified succesfully, Please profileUpdate the User",
           {
-            token: accessToken,
-            refreshToken: refreshToken,
+            token: AccessToken,
             user,
           }
         );
@@ -154,7 +115,6 @@ const verifyOtp = async (req, res) => {
     }
   }
 };
-const refreshTokens = {};
 // Route for user registration
 // router.post('/profileUpdate',
 const profileUpdate = asyncHandler(async (req, res) => {
@@ -167,7 +127,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
       throw new Error("User not found");
     }
     const { name, email, address, wallet = 0, user_role = "normal" } = req.body;
-    // console.log(email, name, address);
+    console.log(email, name, address, user_role);
     if (name && email && address) {
 
       const accessToken = jwt.sign(
@@ -185,41 +145,18 @@ const profileUpdate = asyncHandler(async (req, res) => {
         }
       );
 
-      // Generate a refresh token
-      const refreshToken = jwt.sign(
-        {
-          user: {
-            name: user.name,
-            email: user.email,
-            user_role: "normal",
-            id: String(user._id),
-          },
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-          expiresIn: "1d",
-        }
-      );
-        console.log( 'a ', accessToken,' r ' ,refreshToken);
-      // Store the refresh token associated with the user ID (use a database in production)
-      refreshTokens[user._id] = refreshToken;
-        console.log("ref", refreshTokens);
-      // return res.json({ accessToken, refreshToken });
-
-      res.setHeader("Authorization", `Bearer ${accessToken}`);
       await User.findByIdAndUpdate(
         { _id },
         { name, email, address, wallet, user_role },
         { new: true }
       );
 
-      // res.setHeader("Authorization", `Bearer ${accessToken}`);
+      res.setHeader("Authorization", `Bearer ${accessToken}`);
       const response = createResponse(
         "success",
         "User created/updated successfully",
         {
           token: accessToken,
-          refreshToken: refreshToken,
           user,
         }
       );
@@ -353,38 +290,38 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 });
 
 // Route to refresh the access token using a refresh token
-const refreshTokenFun = asyncHandler(async (req, res) => {
-  const refreshToken = req.body.refreshToken;
+// const refreshTokenFun = asyncHandler(async (req, res) => {
+//   const refreshToken = req.body.refreshToken;
 
-  if (!refreshToken) {
-    return res.status(403).json({ message: "Invalid refresh token" });
-  }
+//   if (!refreshToken) {
+//     return res.status(403).json({ message: "Invalid refresh token" });
+//   }
 
-  // Verify the refresh token
-  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid refresh token" });
-    }
+//   // Verify the refresh token
+//   jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+//     if (err) {
+//       return res.status(403).json({ message: "Invalid refresh token" });
+//     }
 
-    const userId = decoded.userId;
+//     const userId = decoded.userId;
 
-    // Check if the user's refresh token is valid (you might want to validate against a stored value)
-    if (!refreshTokens[userId] || refreshTokens[userId] !== refreshToken) {
-      return res.status(403).json({ message: "Invalid refresh token" });
-    }
+//     // Check if the user's refresh token is valid (you might want to validate against a stored value)
+//     if (!refreshTokens[userId] || refreshTokens[userId] !== refreshToken) {
+//       return res.status(403).json({ message: "Invalid refresh token" });
+//     }
 
-    // Generate a new access token
-    const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "1d",
-    });
+//     // Generate a new access token
+//     const accessToken = jwt.sign({ userId }, process.env.ACCESS_TOKEN_SECRET, {
+//       expiresIn: "1d",
+//     });
 
-    // res.json({ accessToken });
+//     // res.json({ accessToken });
 
-    const response = createResponse("success", "Access Token", { accessToken });
+//     const response = createResponse("success", "Access Token", { accessToken });
 
-    res.status(200).json(response);
-  });
-});
+//     res.status(200).json(response);
+//   });
+// });
 // Function to create a standardized response format
 const createResponse = (status, message, data) => {
   return {
@@ -423,8 +360,7 @@ module.exports = {
   profileUpdate,
   verifyOtp,
   getCurrentUser,
-  addNewUser,
-  refreshTokenFun
+  addNewUser
 };
 
 // {
