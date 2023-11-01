@@ -71,6 +71,27 @@ const verifyOtp = async (req, res) => {
             expiresIn: "1d",
           }
         );
+        
+
+      // Generate a refresh token
+      const refreshToken = jwt.sign(
+        {
+          user: {
+            name: user.name,
+            email: user.email,
+            user_role: "normal",
+            id: String(user._id),
+          },
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "1d",
+        },
+        secretKey
+      );
+
+      // Store the refresh token associated with the user ID (use a database in production)
+      refreshTokens[user._id] = refreshToken;
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         const response = createResponse(
@@ -78,6 +99,7 @@ const verifyOtp = async (req, res) => {
           "User is already registered, Otp verified succesfully!",
           {
             token: accessToken,
+            refreshToken: refreshToken,
             user,
           }
         );
@@ -95,11 +117,33 @@ const verifyOtp = async (req, res) => {
             expiresIn: "1d",
           }
         );
+        
+
+      // Generate a refresh token
+      const refreshToken = jwt.sign(
+        {
+          user: {
+            name: user.name,
+            email: user.email,
+            user_role: "normal",
+            id: String(user._id),
+          },
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+          expiresIn: "1d",
+        },
+        secretKey
+      );
+
+      // Store the refresh token associated with the user ID (use a database in production)
+      refreshTokens[user._id] = refreshToken;
         const response = createResponse(
           "success",
           "Otp verified succesfully, Please profileUpdate the User",
           {
             token: accessToken,
+            refreshToken: refreshToken,
             user,
           }
         );
@@ -181,7 +225,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
 
       // return res.json({ accessToken, refreshToken });
 
-      res.setHeader("Authorization", `Bearer ${accessToken}`);
+      // res.setHeader("Authorization", `Bearer ${accessToken}`);
 
       await User.findByIdAndUpdate(
         { _id: userId },
@@ -189,7 +233,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
         { new: true }
       );
 
-      res.setHeader("Authorization", `Bearer ${accessToken}`);
+      // res.setHeader("Authorization", `Bearer ${accessToken}`);
       const response = createResponse(
         "success",
         "User created/updated successfully",
