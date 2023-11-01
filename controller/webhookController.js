@@ -71,42 +71,35 @@ const webhookCall = asyncHandler(async (req, res) => {
   });
 
   if (mealCreated) {
+
     const orderDetail = await Order.findOne({ orderId: mealCreated.order_id });
 
-    // console.log(orderDetail);
+    console.log(orderDetail);
 
     if (orderDetail) {
+      const _orderId = orderDetail._id.toString();
       if (orderDetail.status !== "captured") {
-        if (orderDetail.divide_to_all_card) {
-          // console.log("Do devide to all qrs.");
 
-          // Fetch documents where the 'code' field is in the provided array
+        if (orderDetail.divide_to_all_card) {
+
           const allQrCodes = await QRCardModel.find();
-          // console.log(" All Qr code s ", allQrCodes.length);
+          
           const allQrCodesLength = allQrCodes.length;
+          
           const totalMealCame = parseInt(mealCreated.amount / 70);
+          
           let remainingMeals = 0;
-          // console.log("totalMealCame" , totalMealCame," remaining meals ",  remainingMeals);
 
           if (totalMealCame > 1) {
+
             remainingMeals = (mealCreated.amount / 70) % allQrCodesLength;
+          
           }
-          // const remainingMeals = totalMealCame % allQrCodes.length;
+
           const eachMeal = parseInt(totalMealCame / allQrCodesLength);
 
-          console.log(
-            "totalMealCame",
-            totalMealCame,
-            " remaining meals ",
-            remainingMeals,
-            "each meals",
-            eachMeal
-          );
-          // console.log("totalMealCame" , totalMealCame, remainingMeals, "allQrCodes.length", allQrCodes.length);
-
-          // console.log('calc - ', remainingMeals, eachMeal);
-
           if (remainingMeals == 0) {
+
             const updatedMealsId = allQrCodes.map((qr) => {
               qr.qr_available_meals = qr.qr_available_meals + eachMeal;
               qr.total_meals = qr.total_meals + eachMeal;
@@ -115,12 +108,11 @@ const webhookCall = asyncHandler(async (req, res) => {
             });
 
             for (let i = 0; i < allQrCodes.length; i++) {
+
               const element = allQrCodes[i];
               const _id = element._id.toString();
               const qr_available_meals = element.qr_available_meals;
               const total_meals = element.total_meals;
-
-              console.log(_id, qr_available_meals, total_meals);
 
               await QRCardModel.findByIdAndUpdate(
                 { _id },
@@ -128,50 +120,33 @@ const webhookCall = asyncHandler(async (req, res) => {
                 { new: true }
               );
             }
-          } else {
-            console.log("came in else");
-            const updatedMealsId = allQrCodes.map((qr) => {
-              console.log(qr);
-              // console.log('inmap ', qr.qr_available_meals, qr.total_meals)
-              // qr.qr_available_meals = qr.qr_available_meals + eachMeal;
-              // qr.total_meals = qr.total_meals + eachMeal;
 
+          } else {
+
+            const updatedMealsId = allQrCodes.map((qr) => {
               return qr._id.toString();
             });
 
-            // console.log('update qrs ', allQrCodes);
-
-            // console.log('updated QRs Id', updatedMealsId);
-
-            console.log("Here");
             for (let i = 0; i < allQrCodes.length; i++) {
+
               const element = allQrCodes[i];
               const _id = element._id.toString();
               const qr_available_meals = element.qr_available_meals;
               const total_meals = element.total_meals;
 
-              console.log(_id, qr_available_meals, total_meals);
-              // Use await inside an async function
               await QRCardModel.findByIdAndUpdate(
                 { _id },
                 { qr_available_meals, total_meals },
                 { new: true }
               );
+
             }
 
-            // console.log("updateResult - ", updateResult);
-
-            const userId = orderDetail.user_id.toString(); // req.user.id.toString();
-
-            console.log("user id ", userId);
+            const userId = orderDetail.user_id.toString();
 
             const userDetail = await UserModel.find({ _id: userId });
 
-            console.log("user detail received", userDetail);
-
             const updateWallet = userDetail[0].wallet + remainingMeals;
-
-            console.log("check after update wallet", updateWallet);
 
             await UserModel.findByIdAndUpdate(
               { _id: userId },
@@ -179,16 +154,17 @@ const webhookCall = asyncHandler(async (req, res) => {
               { new: true }
             );
 
-
             const userDetailUpdate = await UserModel.find({ _id: userId });
 
             await Order.findByIdAndUpdate(
-              { _id: orderDetail._id.toString() },
+              { _id: _orderId },
               { status },
               { new: true });
-              
+
             console.log("received after update", userDetailUpdate);
+
           }
+
         } else {
           const { qr_id } = orderDetail;
 
@@ -198,34 +174,25 @@ const webhookCall = asyncHandler(async (req, res) => {
 
           qRCardDetail.total_meals = qRCardDetail.total_meals + totalMealCame;
 
-          qRCardDetail.qr_available_meals =
-            qRCardDetail.qr_available_meals + totalMealCame;
+          qRCardDetail.qr_available_meals = qRCardDetail.qr_available_meals + totalMealCame;
 
           qRCardDetail.status = qRCardDetail.status == false ? true : true;
 
-          const _id = qRCardDetail._id.toString();
+          const _idQRId = qRCardDetail._id.toString();
 
           const { qr_available_meals, qr_status, total_meals } = qRCardDetail;
 
-          console.log(_id, qr_available_meals, qr_status, total_meals);
-
           await QRCardModel.findByIdAndUpdate(
-            { _id },
+            { _id: _idQRId },
             { qr_available_meals, qr_status, total_meals },
             { new: true }
           );
 
-          console.log("Updated the QR model");
-
           const qRCardDetailAfterUpdate = await QRCardModel.findOne({ qr_id });
-
-          console.log(
-            "qRCardDetail AfterUpdate fetch back ",
-            qRCardDetailAfterUpdate
-          );
-
+        
+          
           await Order.findByIdAndUpdate(
-            { _id: orderDetail._id.toString() },
+            { _id: _orderId },
             { status },
             { new: true });
 
@@ -234,10 +201,10 @@ const webhookCall = asyncHandler(async (req, res) => {
             "Webhook Api called! and udpate QR amount & meals",
             qRCardDetailAfterUpdate
           );
-          res.status(200).json(response);
-        }
 
-        
+          res.status(200).json(response);
+
+        }
 
       } else {
         console.log("orderDetail.status  - Captured");
