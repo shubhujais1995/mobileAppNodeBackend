@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 
 
 app.get("/", (req, res) => {
-    res.send({"message": "Deployed! checked!"});
+    res.send({"message": "Deployed! undo!"});
 })
 
 // app.post('/api/qr/add-qr', (rq, res) => {
