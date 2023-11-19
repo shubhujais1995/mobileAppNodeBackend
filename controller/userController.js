@@ -74,16 +74,16 @@ const verifyOtp = async (req, res) => {
           }
         );
 
-        // Generate refresh token
-        const refreshToken = jwt.sign(
-          {
-            user_id: String(user._id),
-          },
-          process.env.REFRESH_TOKEN_SECRET
-        );
+        // // Generate refresh token
+        // const refreshToken = jwt.sign(
+        //   {
+        //     user_id: String(user._id),
+        //   },
+        //   process.env.REFRESH_TOKEN_SECRET
+        // );
 
-        // Store refresh token in the database (you need to implement this)
-        await storeRefreshToken(user._id, refreshToken);
+        // // Store refresh token in the database (you need to implement this)
+        // await storeRefreshToken(user._id, refreshToken);
 
         res.setHeader("Authorization", `Bearer ${accessToken}`);
         const response = createResponse(
@@ -91,7 +91,7 @@ const verifyOtp = async (req, res) => {
           "User is already registered, Otp verified succesfully!",
           {
             token: accessToken,
-            refreshToken: refreshToken,
+            // refreshToken: refreshToken,
             user,
           }
         );
@@ -173,15 +173,15 @@ const profileUpdate = asyncHandler(async (req, res) => {
         );
 
         // Generate refresh token
-        const refreshToken = jwt.sign(
-          {
-            user_id: user_id,
-          },
-          process.env.REFRESH_TOKEN_SECRET
-        );
-        console.log("usser id - ", user_id);
+        // const refreshToken = jwt.sign(
+        //   {
+        //     user_id: user_id,
+        //   },
+        //   process.env.REFRESH_TOKEN_SECRET
+        // );
+        // console.log("usser id - ", user_id);
         // Store refresh token in the database (you need to implement this)
-        await storeRefreshToken(user_id, refreshToken);
+        // await storeRefreshToken(user_id, refreshToken);
 
         await User.findByIdAndUpdate(
           { _id },
@@ -196,7 +196,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
           "User created/updated successfully",
           {
             token: accessToken,
-            refreshToken: refreshToken,
+            // refreshToken: refreshToken,
             user,
           }
         );
