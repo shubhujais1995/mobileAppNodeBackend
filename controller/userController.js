@@ -172,7 +172,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
           }
         );
 
-        // Generate refresh token
+        Generate refresh token
         const refreshToken = jwt.sign(
           {
             user_id: user_id,
@@ -180,7 +180,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
           process.env.REFRESH_TOKEN_SECRET
         );
         console.log("usser id - ", user_id);
-        // Store refresh token in the database (you need to implement this)
+        Store refresh token in the database (you need to implement this)
         await storeRefreshToken(user_id, refreshToken);
 
         await User.findByIdAndUpdate(
