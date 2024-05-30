@@ -7,8 +7,8 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const AccessToken = require("twilio/lib/jwt/AccessToken");
 const twilio = require("twilio")(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
+  "AC48cd1cfe0c7d2b3da8b787e3aafaba69",
+  "769acb85f1f44d425b20fd3ac49eb647"
 );
 
 const sendOTP = asyncHandler(async (req, res) => {
