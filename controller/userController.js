@@ -421,8 +421,8 @@ function sendOTPToUser(phoneNumber, otp) {
   console.log(phoneNumber, otp, " in send otp user function!");
   twilio.messages.create(
     {
-      body: `Your OTP is Shubham: ${otp}`,
-      from: "+12405650825",
+      body: `Hi, Your OTP is : ${otp}`,
+      from: process.env.TWILIO_TEST_NUMBER,
       to: `${phoneNumber}`,
     },
     function (err, data) {
