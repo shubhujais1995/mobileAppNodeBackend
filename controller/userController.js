@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
 const User = require("../model/userModel");
-const QRCardModel = require("../model/qaCardModel");
+const GiftCardModel = require("../model/giftCardModel");
 const OrdersModel = require("../model/orderModel");
 
 require("dotenv").config();
@@ -55,7 +55,7 @@ const verifyOtp = async (req, res) => {
 
   if (user) {
     const isTimestampValid =
-      Date.now() - new Date(user.updatedAt).getTime() <= 60000;
+      Date.now() - new Date(user.updatedAt).getTime() <= 120000;
 
     if (otp == user.otp && isTimestampValid) {
       if (user.name || user.email || user.address || user.user_role) {
@@ -288,13 +288,13 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   // console.log('wait');
   // const user = allUsers.find((c) => c.id === userId);
 
-  const allQRList = await QRCardModel.find();
+  const allGiftCardList = await GiftCardModel.find();
   const allorders = await OrdersModel.find();
-  // console.log(' all ' ,allQRList, allorders);
+  // console.log(' all ' ,allGiftCardList, allorders);
   const totalTransactionList = allorders.length;
-  const totalActiveQr = allQRList.filter((qr) => qr.qr_status == true).length;
-  const totalDeactiveQr = allQRList.filter(
-    (qr) => qr.qr_status == false
+  const totalActiveCard = allGiftCardList.filter((giftCard) => giftCard.gift_card_status == true).length;
+  const totalDeactiveCard = allGiftCardList.filter(
+    (giftCard) => giftCard.gift_card_status == false
   ).length;
 
   // console.log( ' total -', totalActiveQr, totalDeactiveQr, totalTransactionList);
@@ -313,10 +313,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       address: user.address,
       email: user.email,
       role: user.user_role,
-      wallet: user.wallet,
-      noOfActiveQr: totalActiveQr,
-      noOfDeactiveQr: totalDeactiveQr,
-      noOfTransaction: totalTransactionList,
+      active_cards: totalActiveCard,
+      de_active_cards: totalDeactiveCard,
+      total_transactions: totalTransactionList,
     };
   } else {
     userDetail = {
@@ -387,7 +386,7 @@ const refreshTokenFun = asyncHandler(async (req, res) => {
             { userId },
             process.env.ACCESS_TOKEN_SECRET,
             {
-              expiresIn: "1d",
+              expiresIn: "375d",
             }
           );
           console.log("new access token ", accessToken);
@@ -443,52 +442,3 @@ module.exports = {
   addNewUser,
   refreshTokenFun,
 };
-
-// {
-//   "status": true,
-//   "message": "sucessfully fetched",
-//   "error": 0,
-//   "data": {
-//     "name": "Amit",
-//     "mobile": "9910508758",
-//     "email": "",
-//     "address": "",
-//     "meal_available": 0,
-//     "meal_value": "70",
-//     "user_role":"",
-//     "active_cards":null,
-//     "deactive_cards":null,
-//     "total_transactions": null,
-
-//     "recent_qr_cards": [
-//       {
-//         "qr_id":"13",
-//         "qr_display_name":"My QR Cards-1",
-//         "qr_code": "1kjhbjgvg",
-//         "status": true,
-//         "qr_available_meals": 0,
-//         "qr_app":""
-//       },
-//       {
-//          "qr_id":"234",
-//         "qr_display_name":"My QR Cards-3",
-//         "qr_code": "76vt544",
-//         "status": true,
-//         "qr_available_meals": 0,
-//         "qr_app":""
-//       },
-//       {
-//         "qr_id":"343",
-//         "qr_display_name":"My QR Cards-3",
-//         "qr_code": "fvgr547h",
-//         "status": true,
-//         "qr_available_meals": 0,
-//         "qr_app":""
-//       }
-//     ]
-//   }
-
-// }
-
-// add QR, update QR, get QL list,
-//  Wallet Recharge -> update QR  ,

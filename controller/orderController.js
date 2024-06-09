@@ -4,9 +4,9 @@ const axios = require("axios");
 
 const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
   try {
-    const { amount, currency, divide_to_all_card, qr_id } = req.body;
+    const { amount, currency} = req.body;
 
-    if (!amount || !currency || !qr_id) {
+    if (!amount || !currency) {
       res.status(400);
       throw new Error("All fields are mandatory in AddOrderGetPaymentId API");
     }
@@ -21,7 +21,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
         "Content-Type": "application/json",
       },
     });
-    const responseData = apiResponse.data;
+    const responseData = apiResponse. data;
 
     console.log(
       "responseData response from axios success -" , responseData
@@ -34,9 +34,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
       currency: responseData.currency,
       method: "card",
       amount: responseData.amount,
-      user_id: req.user.id,
-      divide_to_all_card: divide_to_all_card, 
-      qr_id:qr_id
+      user_id: req.user.id
     };
 
     const orderCreated = await Order.create(obj);
@@ -112,79 +110,6 @@ const getAllTransactions = asyncHandler(async (req, res) => {
   }
 
 });
-
-// function makeRequest(url, method, data) {
-//   const options = {
-//     method: method,
-//     headers: {
-//       "Content-Type": "application/json",
-//     },
-//   };
-
-//   if (data) {
-//     options.body = JSON.stringify(data);
-//   }
-
-//   return new Promise((resolve, reject) => {
-//     const req = http.request(url, options, (res) => {
-//       let responseData = "";
-
-//       res.on("data", (chunk) => {
-//         responseData += chunk;
-//       });
-
-//       res.on("end", () => {
-//         resolve(JSON.parse(responseData));
-//       });
-//     });
-
-//     req.on("error", (error) => {
-//       reject(error);
-//     });
-
-//     if (data) {
-//       req.write(JSON.stringify(data));
-//     }
-
-//     req.end();
-//   });
-// }
-
-// async function fetchData() {
-//   try {
-//     // First API call
-//     const data1 = await makeRequest("https://api.example.com/data1", "GET");
-
-//     // Process data1 or make decisions based on it
-
-//     // Second API call with data from the first call
-//     const data2 = await makeRequest("https://api.example.com/data2", "POST", {
-//       data: data1,
-//     });
-
-//     // Process data2 or make decisions based on it
-
-//     // Third API call with data from the second call
-//     const data3 = await makeRequest("https://api.example.com/data3", "PUT", {
-//       data: data2,
-//     });
-
-//     // Continue processing or return the final result
-//     return data3;
-//   } catch (error) {
-//     console.error("Error:", error.message);
-//     throw error; // Propagate the error to the calling function or handle it accordingly
-//   }
-// }
-
-// // Call the function and handle the result or error
-// fetchData()
-//   .then((result) => {
-//     console.log("Final Result:", result);
-//   })
-//   .catch((error) => {
-//     console.error("Failed to fetch data:", error.message);
-//   });
 
 // Function to create a standardized response format
 const createResponse = (status, message, data) => {

@@ -13,9 +13,7 @@ const orderSchema = mongoose.Schema(
     entity: { type: String },
     amount: { type: Number },
     currency: { type: String },
-    status: { type: String },
-    divide_to_all_card: { type: Boolean },
-    qr_id: { type: String },
+    status: { type: String }
   },
   {
     timestamps: true,

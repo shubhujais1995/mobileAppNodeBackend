@@ -1,10 +1,16 @@
 const mongoose = require("mongoose");
 
 const fbTokenSchema = mongoose.Schema(
-    {
-        firebaseToken: { type: String, unique: true, required: true }
-    },{
-        timestamps: true
-    }
-)
+  {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "User",
+    },
+    firebaseToken: { type: String, unique: true, required: true },
+  },
+  {
+    timestamps: true,
+  }
+);
 module.exports = mongoose.model("FBTOKEN", fbTokenSchema);

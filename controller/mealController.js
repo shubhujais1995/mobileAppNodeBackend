@@ -2,96 +2,71 @@ const express = require("express");
 const mongoose = require("mongoose");
 const asyncHandler = require("express-async-handler");
 const Meal = require("../model/mealModel");
-const QRCard = require("../model/qaCardModel");
-const addMeal = asyncHandler(async (req, res) => {
-  const requestBody = req.body;
+const GiftCard = require("../model/giftCardModel");
+const UserModel = require("../model/userModel");
 
-  console.log(req.body);
+const addMealToCard = asyncHandler(async (req, res) => {
+  const { gift_card_code, meals } = req.body;
 
-  // Loop through each object in the request body
-  const updatedDocuments = await Promise.all(
-    requestBody.map(async (data) => {
-      const { qr_id, meals } = data;
+  console.log(req.params.id);
+  try {
+    const giftCardDetail = await GiftCard.find({
+      gift_card_code: gift_card_code,
+    });
 
-      // Fetch documents to update for the current QR ID
-      const documentsToUpdate = await QRCard.find({ qr_id: qr_id });
+    if (giftCardDetail[0].gift_card_status === true) {
+      const userDetail = await UserModel.find({ _id: req.user.id });
 
-      // Update each document
-      const updatedDocs = await Promise.all(
-        documentsToUpdate.map(async (document) => {
-          console.log(" qr_id - current - ", qr_id,  document.qr_available_meals);
-          document.qr_available_meals += meals;
-          return document.save();
-        })
+      if (userDetail[0].wallet != 0 && userDetail[0].wallet >= meals) {
+        var updateWalletToUser = userDetail[0].wallet - meals;
+        var updateAvailableToCard = giftCardDetail[0].available_meals + meals;
+        var updateTotalToCard = giftCardDetail[0].total_meals + meals;
+
+        var resultResponse = await GiftCard.findByIdAndUpdate(
+          { _id: giftCardDetail[0]._id },
+          { available_meals: updateAvailableToCard, total_meals: updateTotalToCard },
+          { new: true }
+        );
+
+        await UserModel.findByIdAndUpdate(
+          { _id: req.user.id },
+          { wallet: updateWalletToUser },
+          { new: true }
+        );
+
+        const response = createResponse(
+          "success",
+          "Meals successfully updated ",
+          resultResponse
+        );
+
+        res.status(200).json(response);
+      } else {
+        const response = createResponse(
+          "error",
+          "Meals failed to update",
+          null
+        );
+
+        res.status(200).json(response);
+      }
+    } else {
+      const response = createResponse(
+        "error",
+        "You can add meal to deactivated card, please activate the card to add",
+        null
       );
 
-      return { qr_id, updatedDocs };
-    })
-  );
-
-  // Log the updated documents
-  console.log(updatedDocuments);
-
-  // Send response to the client
-  const response = createResponse("success", "Meals Updated Successfully!", null);
-
-  res.status(200).json(response);
-
-  // if ( !qr_id || !meals ) {
-  //   res.status(400);
-  //   throw new Error("All fields are mandatory");
-  // }
-
-  // const documentsToUpdate = await QRCard.find({ qr_id: qr_id });
-
-  // console.log(" meal " ,documentsToUpdate);
-
-  // const updatedDocuments = await Promise.all(
-  //     documentsToUpdate.map(async (document) => {
-  //       document.qr_available_meals = meals;
-
-  //       return document.save();
-  //     })
-  //   );
-  // console.log(updatedDocuments);
-  // const response = createResponse(201, {
-  //   message: "Meal Updated succesfully!",
-  //   updatedDocuments,
-  // });
-  // res.status(201).json(response);
+      res.status(200).json(response);
+    }
+  } catch (error) {
+    console.error("Error from axios:", error);
+    // res.status(500).json({ success: false, error: "Internal Server Error" });
+    const response = createResponse("error", "add meal failed!", null);
+    res.status(200).json(response);
+  }
 });
 
-// getMeals = asyncHandler(async (req, res) => {
-//   const {
-//     qr_id,
-//     meals
-//   } = req.body;
-
-//   if ( !qr_id || !meals ) {
-//     res.status(400);
-//     throw new Error("All fields are mandatory");
-//   }
-
-//   const documentsToUpdate = await QRCard.find({ qr_id: qr_id });
-
-//   console.log(" meal " ,documentsToUpdate);
-
-//   const updatedDocuments = await Promise.all(
-//       documentsToUpdate.map(async (document) => {
-//         document.qr_available_meals = meals;
-
-//         return document.save();
-//       })
-//     );
-//   console.log(updatedDocuments);
-//   const response = createResponse(201, {
-//     message: "Meal Updated succesfully!",
-//     updatedDocuments,
-//   });
-//   res.status(201).json(response);
-// });
-
-// Function to create a standardized response format
 const createResponse = (status, message, data) => {
   return {
     status,
@@ -100,4 +75,4 @@ const createResponse = (status, message, data) => {
   };
 };
 
-module.exports = { addMeal };
+module.exports = { addMealToCard };

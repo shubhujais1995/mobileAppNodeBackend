@@ -7,7 +7,7 @@ const mealsSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
-    qr_id: { type: String },
+    gift_card_code: { type: String },
     meals: { type: Number },
   },
   {

@@ -31,4 +31,11 @@ const validateToken = asyncHandler(async (req, res, next) => {
 
 });
 
+const createResponse = (status, message, data) => {
+    return {
+      status,
+      message,
+      data,
+    };
+  };
 module.exports = validateToken;

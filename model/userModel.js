@@ -8,7 +8,10 @@ const userSchema = mongoose.Schema(
     email: { type: String },
     address: { type: String },
     user_role: { type: String },
-    wallet: { type: Number }
+    wallet: { type: Number },
+    active_cards: { type: Number },
+    de_active_cards: { type: Number },
+    total_transactions: { type: Number }
   },
   {
     timestamps: true,

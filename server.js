@@ -1,6 +1,6 @@
 const express = require('express');
 const userRoutes = require('./router/userRoute');
-const qrRoutes = require('./router/qrRoute');
+const giftCardRoutes = require('./router/giftCardRoutes');
 const mealsRoutes = require('./router/mealsRoute');
 const fbtRoutes = require('./router/firebaseTokenRoute');
 const orderRoutes = require('./router/orderRoute');
@@ -31,7 +31,7 @@ app.get("/", (req, res) => {
 // });
 app.use(express.json());
 app.use('/api/user', userRoutes);
-app.use('/api/qr', qrRoutes);
+app.use('/api/gift-card', giftCardRoutes);
 app.use('/api/fb', fbtRoutes);
 app.use('/api/meals', mealsRoutes);
 app.use('/api/orders', orderRoutes);
