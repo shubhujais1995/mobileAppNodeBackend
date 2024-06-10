@@ -1,7 +1,7 @@
 const express = require('express');
 const userRoutes = require('./router/userRoute');
 const giftCardRoutes = require('./router/giftCardRoutes');
-const mealsRoutes = require('./router/mealsRoute');
+const testimonialRoutes = require('./router/testimonialRoute');
 const fbtRoutes = require('./router/firebaseTokenRoute');
 const orderRoutes = require('./router/orderRoute');
 const webhookRoutes = require('./router/webhookRoute');
@@ -33,7 +33,7 @@ app.use(express.json());
 app.use('/api/user', userRoutes);
 app.use('/api/gift-card', giftCardRoutes);
 app.use('/api/fb', fbtRoutes);
-app.use('/api/meals', mealsRoutes);
+app.use('/api/testimonial', testimonialRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/wh', webhookRoutes);
 app.use(errorHandler); //middleware for getting error properly

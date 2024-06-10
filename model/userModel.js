@@ -9,6 +9,7 @@ const userSchema = mongoose.Schema(
     address: { type: String },
     user_role: { type: String },
     wallet: { type: Number },
+    total_redeem: { type: Number },
     active_cards: { type: Number },
     de_active_cards: { type: Number },
     total_transactions: { type: Number }

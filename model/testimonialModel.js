@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 
-const mealsSchema = mongoose.Schema(
+const testimonialSchema = mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "User",
     },
-    gift_card_code: { type: String },
-    meals: { type: Number },
+    data: { type: String },
+    auther: { type: String },
   },
   {
     timestamps: true,
   }
 );
-module.exports = mongoose.model("Meal", mealsSchema);
+module.exports = mongoose.model("Testimonial", testimonialSchema);

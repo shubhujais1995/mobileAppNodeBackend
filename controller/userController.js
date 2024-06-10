@@ -149,7 +149,6 @@ const profileUpdate = asyncHandler(async (req, res) => {
         name,
         email,
         address,
-        wallet = 0,
         user_role = "normal",
       } = req.body;
 
@@ -185,7 +184,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
 
         await User.findByIdAndUpdate(
           { _id },
-          { name, email, address, wallet, user_role },
+          { name:name, email:email, address:address,  user_role:user_role },
           { new: true }
         );
 
@@ -228,7 +227,7 @@ const addNewUser = asyncHandler(async (req, res) => {
     const currentUserRole = req.user.user_role;
 
     if (currentUserRole == "super_admin") {
-      const { name, email, address, wallet = 0, phoneNumber } = req.body;
+      const { name, email, address, phoneNumber } = req.body;
 
       console.log(email, name, address, phoneNumber);
 
@@ -236,12 +235,12 @@ const addNewUser = asyncHandler(async (req, res) => {
         const user_role = "admin";
 
         const user = await User.create({
-          name,
-          email,
-          address,
-          wallet,
-          user_role,
-          phoneNumber,
+          name:name,
+          email:email,
+          address:address,
+          total_redeem:0,
+          user_role:user_role,
+          phoneNumber:phoneNumber,
           timestamp: Date.now(),
         });
 
@@ -316,6 +315,15 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       active_cards: totalActiveCard,
       de_active_cards: totalDeactiveCard,
       total_transactions: totalTransactionList,
+    };
+  }else if (userRole == "admin") {
+    userDetail = {
+      name: user.name,
+      phone: user.phoneNumber,
+      address: user.address,
+      email: user.email,
+      role: user.user_role,
+      total_redeem: user.total_redeem,
     };
   } else {
     userDetail = {

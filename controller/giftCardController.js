@@ -119,7 +119,7 @@ const getGiftCardById = asyncHandler(async (req, res) => {
       const response = createResponse(
         "success",
         "GiftCard Detail fetched succesfully!",
-        gifCardDetail
+        giftCardDetail
       );
       res.status(200).json(response);
     }
@@ -159,56 +159,86 @@ const getGiftCardById = asyncHandler(async (req, res) => {
 
 const redeemGiftCard = asyncHandler(async (req, res) => {
   const currentUserRole = req.user.user_role;
-  if (currentUserRole != "admin"){
-    const { gift_card_code } = req.body;
-
-    const gifCardDetailList = await GiftCard.find({ gift_card_code });
-    const gifCardDetail = gifCardDetailList[0];
-    console.log(" gifCardDetail == ", gifCardDetail);
-
-    if (!gifCardDetail) {
-      console.log("gifCardDetail came in error");
-      res.status(404);
-      throw new Error("Please provide valid QR Id!");
-    } else {
-      console.log("came in else");
-      if (gifCardDetail.available_meals < 1) {
-        console.log("came in 404");
-        // res.status(404);
-        // throw new Error("Meals are not left in your account!");
+  const user_id = req.user.id;
+   try {
+    if (currentUserRole === "admin"){
+      const { gift_card_code } = req.body;
+  
+      const gifCardDetailList = await GiftCard.find({ gift_card_code });
+      const gifCardDetail = gifCardDetailList[0];
+      console.log(" gifCardDetail == ", gifCardDetail);
+  
+      if (!gifCardDetail) {
         const response = createResponse(
-          "success",
-          "Meals are not left in your account!",
+          "error",
+          "Please provide valid gift card code",
           null
         );
         res.status(200).json(response);
       } else {
-        let available_meals = gifCardDetail.available_meals - 1;
-        const _id = gifCardDetail._id.toString();
-        await GiftCard.findByIdAndUpdate(
-          { _id },
-          { available_meals },
-          { new: true }
-        );
-        console.log("updated");
+        console.log("came in else");
+        if (gifCardDetail.available_meals < 1) {
+          console.log("came in 404");
+          // res.status(404);
+          // throw new Error("Meals are not left in your account!");
+          const response = createResponse(
+            "success",
+            "Meals are not left in your account!",
+            null
+          );
+          res.status(200).json(response);
+        } else {
+          let available_meals = gifCardDetail.available_meals - 1;
+          const _id = gifCardDetail._id.toString();
+          await GiftCard.findByIdAndUpdate(
+            { _id },
+            { available_meals },
+            { new: true }
+          );
+    
+          var total_redeem = 0
+          const userDetail = await User.findOne({ _id:user_id });
+          if(!userDetail.total_redeem){
+            total_redeem = 0;
+          }else{
+            total_redeem = userDetail.total_redeem;
+          }
 
-        const response = createResponse(
-          "success",
-          "Meal redeem succesfully!",
-          null
-        );
-
-        res.status(200).json(response);
+           total_redeem = total_redeem + 1;
+  
+          await User.findByIdAndUpdate(
+            { _id:user_id },
+            { total_redeem:total_redeem },
+            { new: true }
+          );
+          console.log("updated");
+  
+          const response = createResponse(
+            "success",
+            "Meal redeem succesfully!",
+            null
+          );
+  
+          res.status(200).json(response);
+        }
       }
+    } else {
+      const response = createResponse(
+        "error",
+        "You are not authrized to redeem the gift card",
+        null
+      );
+  
+      res.status(200).json(response);
     }
-  } else  {
+   } catch (error) {
     const response = createResponse(
       "error",
-      "You are not autherized redeem meals!",
+      "Error while redeeming the meal, Please again later",
       null
     );
-    res.status(401).json(response);
-  } 
+    res.status(200).json(response);
+   }
 });
 
 
