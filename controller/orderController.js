@@ -13,7 +13,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
 
     const url = "https://api.razorpay.com/v1/orders";
     const AuthorizationToken =
-      "Basic cnpwX3Rlc3RfRFpWTzBIWjR3MVdZSGk6M1pJSmlJNFM1cFoyOHQyY3ZLblR0S3hK";
+      "Basic cnpwX3Rlc3RfbEg4OU5HaVRhaFprODY6ZGJKaVZVeEhDeEo2VnBJc3JjdWxpMzJq";
 
     const apiResponse = await axios.post(url, {amount, currency}, {
       headers: {
@@ -53,7 +53,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
     // res.status(500).json({ success: false, error: "Internal Server Error" });
     const response = createResponse("error", 
       "Order creation failed!",
-      null,
+      error
     );
     res.status(200).json(response);
   }
