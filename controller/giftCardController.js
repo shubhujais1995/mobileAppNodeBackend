@@ -172,7 +172,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
   
       const gifCardDetailList = await GiftCard.find({ gift_card_code });
       const gifCardDetail = gifCardDetailList[0];
-      user_id = gifCardDetail[0].user_id;
+      user_id = gifCardDetail.user_id;
       userDetail = await User.findOne({ _id: user_id });
       user_id = userDetail.id;
       console.log("gifCardDetail == ", gifCardDetail);
