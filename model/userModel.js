@@ -11,7 +11,7 @@ const userSchema = mongoose.Schema(
     wallet: { type: Number },
     user_donated_meals: { type: Number },
     inali_donated_meals: { type: Number },
-    meals_available: { type: Number },
+    total_meals_available: { type: Number },
     total_redeem: { type: Number },
     active_cards: { type: Number },
     de_active_cards: { type: Number },
