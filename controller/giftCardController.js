@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const GiftCard = require("../model/giftCardModel");
 const User = require("../model/userModel");
+const firebaseTokenController = require("../controller/firebaseTokenController");
 
 const createGiftCard = asyncHandler(async (req, res) => {
   const gift_card_code = await generateCode();
@@ -159,13 +160,16 @@ const getGiftCardById = asyncHandler(async (req, res) => {
 
 const redeemGiftCard = asyncHandler(async (req, res) => {
   const currentUserRole = req.user.user_role;
-  const user_id = req.user.id;
+  var user_id = "";
+  var userDetail =null;
    try {
     if (currentUserRole === "admin"){
       const { gift_card_code } = req.body;
   
       const gifCardDetailList = await GiftCard.find({ gift_card_code });
       const gifCardDetail = gifCardDetailList[0];
+      user_id = gifCardDetailList[0].user_id;
+      userDetail = await User.findOne({ _id:user_id });
       console.log(" gifCardDetail == ", gifCardDetail);
   
       if (!gifCardDetail) {
@@ -187,6 +191,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
             null
           );
           res.status(200).json(response);
+          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name,"We are unable to redeem meal from your account. Please add more meals");
         } else {
           let available_meals = gifCardDetail.available_meals - 1;
           const _id = gifCardDetail._id.toString();
@@ -197,7 +202,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
           );
     
           var total_redeem = 0
-          const userDetail = await User.findOne({ _id:user_id });
+     
           if(!userDetail.total_redeem){
             total_redeem = 0;
           }else{
@@ -212,7 +217,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
             { new: true }
           );
           console.log("updated");
-  
+          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name+", Thank you","We have successfully redeem an meal from your account");
           const response = createResponse(
             "success",
             "Meal redeem succesfully!",
@@ -310,6 +315,71 @@ const addMealToCard = asyncHandler(async (req, res) => {
   }
 });
 
+const transferMealToWallet = asyncHandler(async (req, res) => {
+  const { gift_card_code, meals } = req.body;
+
+  console.log(req.params.id);
+  try {
+    const giftCardDetail = await GiftCard.findOne({
+      gift_card_code: gift_card_code,
+    });
+
+    if(giftCardDetail){
+      if (giftCardDetail.gift_card_status === true) {
+        const userDetail = await User.findOne({ _id: req.user.id });
+  
+        if (giftCardDetail.available_meals >= meals) {
+          var updateWalletToUser = userDetail.wallet + meals;
+     
+          var resultResponse = await GiftCard.findByIdAndUpdate(
+            { _id: giftCardDetail._id },
+            { available_meals: 0,  },
+            { new: true }
+          );
+  
+          await User.findByIdAndUpdate(
+            { _id: req.user.id },
+            { wallet: updateWalletToUser },
+            { new: true }
+          );
+  
+          const response = createResponse(
+            "success",
+            "Meals successfully transfered",
+            resultResponse
+          );
+  
+          res.status(200).json(response);
+        } else {
+          const response = createResponse(
+            "error",
+            "In-sufficient meals",
+            null
+          );
+  
+          res.status(200).json(response);
+        }
+      } else {
+        const response = createResponse(
+          "error",
+          "You can not add meal to deactivated card, please activate the card to add",
+          null
+        );
+  
+        res.status(200).json(response);
+      }
+    }else{
+      const response = createResponse("error", "Please enter valid card code", null);
+      res.status(200).json(response);
+    }
+    
+  } catch (error) {
+    console.error("Error from axios:", error);
+    // res.status(500).json({ success: false, error: "Internal Server Error" });
+    const response = createResponse("error", "transfer meal failed!", null);
+    res.status(200).json(response);
+  }
+});
 
 // Function to generate a gift card number
 async function generateCode() {
@@ -336,4 +406,5 @@ module.exports = {
   redeemGiftCard,
   getGiftCardById,
   addMealToCard,
+  transferMealToWallet,
 };

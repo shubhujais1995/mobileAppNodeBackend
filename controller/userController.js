@@ -145,12 +145,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
       const response = createResponse("error", "User Not Found!", null);
       res.status(200).json(response);
     } else {
-      const {
-        name,
-        email,
-        address,
-        user_role = "normal",
-      } = req.body;
+      const { name, email, address, user_role = "normal" } = req.body;
 
       console.log(email, name, address, user_role);
 
@@ -184,7 +179,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
 
         await User.findByIdAndUpdate(
           { _id },
-          { name:name, email:email, address:address,  user_role:user_role },
+          { name: name, email: email, address: address, user_role: user_role },
           { new: true }
         );
 
@@ -235,12 +230,12 @@ const addNewUser = asyncHandler(async (req, res) => {
         const user_role = "admin";
 
         const user = await User.create({
-          name:name,
-          email:email,
-          address:address,
-          total_redeem:0,
-          user_role:user_role,
-          phoneNumber:phoneNumber,
+          name: name,
+          email: email,
+          address: address,
+          total_redeem: 0,
+          user_role: user_role,
+          phoneNumber: phoneNumber,
           timestamp: Date.now(),
         });
 
@@ -283,20 +278,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   const userDetails = await User.find({ _id });
   const user = userDetails[0];
   console.log(user);
-  // console.log(userRole, _id, user);
-  // console.log('wait');
-  // const user = allUsers.find((c) => c.id === userId);
 
   const allGiftCardList = await GiftCardModel.find();
-  const allorders = await OrdersModel.find();
-  // console.log(' all ' ,allGiftCardList, allorders);
-  const totalTransactionList = allorders.length;
-  const totalActiveCard = allGiftCardList.filter((giftCard) => giftCard.gift_card_status == true).length;
-  const totalDeactiveCard = allGiftCardList.filter(
-    (giftCard) => giftCard.gift_card_status == false
-  ).length;
-
-  // console.log( ' total -', totalActiveQr, totalDeactiveQr, totalTransactionList);
 
   if (!user) {
     // res.status(404);
@@ -306,6 +289,16 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   }
   let userDetail;
   if (userRole == "super_admin") {
+    const allorders = await OrdersModel.find();
+    // console.log(' all ' ,allGiftCardList, allorders);
+    const totalTransactionList = allorders.length;
+    const totalActiveCard = allGiftCardList.filter(
+      (giftCard) => giftCard.gift_card_status == true
+    ).length;
+    const totalDeactiveCard = allGiftCardList.filter(
+      (giftCard) => giftCard.gift_card_status == false
+    ).length;
+
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -316,7 +309,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       de_active_cards: totalDeactiveCard,
       total_transactions: totalTransactionList,
     };
-  }else if (userRole == "admin") {
+  } else if (userRole == "admin") {
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -326,6 +319,12 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       total_redeem: user.total_redeem,
     };
   } else {
+    var getMealServeredByUser = getAvailableMeals(
+      allGiftCardList,
+      _id
+    );
+    var getMealServeredByInali = getAvailableMeals(allGiftCardList, null);
+
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -333,6 +332,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       email: user.email,
       role: user.user_role,
       wallet: user.wallet,
+      user_donated_meals: getMealServeredByUser,
+      inali_donated_meals: getMealServeredByInali,
     };
   }
   // console.log(userDetail);
@@ -394,7 +395,7 @@ const refreshTokenFun = asyncHandler(async (req, res) => {
             { userId },
             process.env.ACCESS_TOKEN_SECRET,
             {
-              expiresIn: "375d",
+              expiresIn: "1y",
             }
           );
           console.log("new access token ", accessToken);
@@ -440,6 +441,27 @@ function sendOTPToUser(phoneNumber, otp) {
       }
     }
   ); //en d of sendMessage;
+}
+
+function getAvailableMeals(allGiftCardList, userId) {
+  var tempGiftCard = null;
+  if (userId) {
+    tempGiftCard = allGiftCardList.filter(
+      (giftCard) => giftCard.user_id == userId
+    );
+  } else {
+    tempGiftCard = allGiftCardList;
+  }
+
+  let availableMealList = tempGiftCard.map(
+    ({ available_meals }) => available_meals
+  );
+  const availableMeals = availableMealList.reduce((a, b) => a + b, 0);
+
+  let totalMealList = tempGiftCard.map(({ total_meals }) => total_meals);
+  const totalMeals = totalMealList.reduce((a, b) => a + b, 0);
+
+  return totalMeals - availableMeals;
 }
 
 module.exports = {

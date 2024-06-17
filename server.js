@@ -8,9 +8,11 @@ const webhookRoutes = require('./router/webhookRoute');
 const errorHandler = require('./middleware/errorHandler');
 const dotenv = require("dotenv").config();
 const connectDb = require("./connection/dbConnection");
+const firebaseApp = require("./connection/firebaseApp");
 const bodyParser = require('body-parser')
 
 connectDb();
+firebaseApp();
 
 const app = express();
 const port = process.env.PORT || 3000;
