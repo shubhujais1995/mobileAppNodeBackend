@@ -1,20 +1,21 @@
+const admin = require("firebase-admin");
+const { decryptToString } = require("../security/aai-secure-file.js");
 
-const admin = require('firebase-admin');
-const serviceAccount = require('../aai-food-doner-firebase-adminsdk-2z5gy-d844c3f67e.json');
-
+const secureFileName = "./aai-secure-service-account-sdk.json.secure";
 
 const firebaseApp = async () => {
+  try {
+    const jsonStr = await decryptToString(secureFileName);
+    const serviceAccount = JSON.parse(jsonStr);
 
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-          });
-          console.log("firebase App initialized successfull");
-    } catch (error) {
-        console.log("errfirebase App Error: "+error);
-        process.exit(1);
-    }
-   
-}
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+    console.log("firebase App initialized successfull");
+  } catch (error) {
+    console.log("error firebase App Error: " + error);
+    process.exit(1);
+  }
+};
 
 module.exports = firebaseApp;
