@@ -281,6 +281,16 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
   const allGiftCardList = await GiftCardModel.find();
 
+  const allorders = await OrdersModel.find();
+  // console.log(' all ' ,allGiftCardList, allorders);
+  const totalTransactionList = allorders.length;
+  const totalActiveCard = allGiftCardList.filter(
+    (giftCard) => giftCard.gift_card_status == true
+  ).length;
+  const totalDeactiveCard = allGiftCardList.filter(
+    (giftCard) => giftCard.gift_card_status == false
+  ).length;
+
   if (!user) {
     // res.status(404);
     // throw new Error("User not found");
@@ -289,16 +299,6 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   }
   let userDetail;
   if (userRole == "super_admin") {
-    const allorders = await OrdersModel.find();
-    // console.log(' all ' ,allGiftCardList, allorders);
-    const totalTransactionList = allorders.length;
-    const totalActiveCard = allGiftCardList.filter(
-      (giftCard) => giftCard.gift_card_status == true
-    ).length;
-    const totalDeactiveCard = allGiftCardList.filter(
-      (giftCard) => giftCard.gift_card_status == false
-    ).length;
-
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -319,12 +319,10 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       total_redeem: user.total_redeem,
     };
   } else {
-    var getMealServeredByUser = getAvailableMeals(
-      allGiftCardList,
-      _id
-    );
+    var getMealServeredByUser = getAvailableMeals(allGiftCardList, _id);
     var getMealServeredByInali = getAvailableMeals(allGiftCardList, null);
-
+    var getTotalAvailableMeal = getTotalAvailableMeals(allGiftCardList, _id);
+    var totalCards = totalActiveCard + totalDeactiveCard;
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
@@ -334,6 +332,8 @@ const getCurrentUser = asyncHandler(async (req, res) => {
       wallet: user.wallet,
       user_donated_meals: getMealServeredByUser,
       inali_donated_meals: getMealServeredByInali,
+      total_meals_available: getTotalAvailableMeal,
+      active_cards: totalCards,
     };
   }
   // console.log(userDetail);
@@ -464,6 +464,17 @@ function getAvailableMeals(allGiftCardList, userId) {
   return totalMeals - availableMeals;
 }
 
+function getTotalAvailableMeals(allGiftCardList, userId) {
+  var tempGiftCard = allGiftCardList.filter(
+    (giftCard) => giftCard.user_id == userId
+  );
+  let availableMealList = tempGiftCard.map(
+    ({ available_meals }) => available_meals
+  );
+  const availableMeals = availableMealList.reduce((a, b) => a + b, 0);
+
+  return availableMeals;
+}
 module.exports = {
   sendOTP,
   profileUpdate,
