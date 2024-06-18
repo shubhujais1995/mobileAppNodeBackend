@@ -70,7 +70,7 @@ const verifyOtp = async (req, res) => {
           },
           process.env.ACCESS_TOKEN_SECRET,
           {
-            expiresIn: "1d",
+            expiresIn: "30d",
           }
         );
 
@@ -106,7 +106,7 @@ const verifyOtp = async (req, res) => {
           },
           process.env.ACCESS_TOKEN_SECRET,
           {
-            expiresIn: "1d",
+            expiresIn: "30d",
           }
         );
 
@@ -162,7 +162,7 @@ const profileUpdate = asyncHandler(async (req, res) => {
           },
           process.env.ACCESS_TOKEN_SECRET,
           {
-            expiresIn: "1d",
+            expiresIn: "30d",
           }
         );
 
