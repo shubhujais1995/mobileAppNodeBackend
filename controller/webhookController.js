@@ -90,7 +90,7 @@ const webhookCall = asyncHandler(async (req, res) => {
 
           const updateWallet = userDetail[0].wallet + totalMealCame;
 
-          await UserModel.findByIdAndUpdate(
+        var userData=   await UserModel.findByIdAndUpdate(
             { _id: userId },
             { wallet: updateWallet },
             { new: true }
@@ -99,7 +99,7 @@ const webhookCall = asyncHandler(async (req, res) => {
           const response = createResponse(
             "success",
             "Webhook Api called! and udpate QR amount & meals",
-            GiftCardDetailAfterUpdate
+            userData
           );
 
           res.status(200).json(response);
