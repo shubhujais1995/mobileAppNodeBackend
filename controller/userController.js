@@ -298,7 +298,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     res.status(200).json(response);
   }
   let userDetail;
-  if (userRole == "super_admin") {
+  if (userRole == "super-admin") {
     userDetail = {
       name: user.name,
       phone: user.phoneNumber,
