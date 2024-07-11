@@ -5,12 +5,13 @@ const Testimonial = require("../model/testimonialModel");
 
 
 const addTestimonial = asyncHandler(async (req, res) => {
-  const { data } = req.body;
+  const { data, title } = req.body;
 
  try {
   if(data !==null){
     const testimonial = await Testimonial.create({
       user_id: req.user.id,
+      title: title,
       data: data,
       auther: req.user.name,
     });

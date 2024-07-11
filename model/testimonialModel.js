@@ -7,6 +7,7 @@ const testimonialSchema = mongoose.Schema(
       required: true,
       ref: "User",
     },
+    title: { type: String },
     data: { type: String },
     auther: { type: String },
   },
