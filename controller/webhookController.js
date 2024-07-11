@@ -88,10 +88,7 @@ const webhookCall = asyncHandler(async (req, res) => {
 
           const totalMealCame = parseInt(mealCreated.amount / 70);
 
-          const walletFromDB =
-            userDetail[0].wallet === null || userDetail[0].wallet === "NaN"
-              ? 0
-              : userDetail[0].wallet;
+          const walletFromDB =  (!userDetail[0].wallet) ? userDetail[0].wallet  : 0;
 
           const updateWallet = walletFromDB + totalMealCame;
 
