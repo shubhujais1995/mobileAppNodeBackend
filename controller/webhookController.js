@@ -88,9 +88,14 @@ const webhookCall = asyncHandler(async (req, res) => {
 
           const totalMealCame = parseInt(mealCreated.amount / 70);
 
-          const updateWallet = userDetail[0].wallet + totalMealCame;
+          const walletFromDB =
+            userDetail[0].wallet === null || userDetail[0].wallet === "NaN"
+              ? 0
+              : userDetail[0].wallet;
 
-        var userData=   await UserModel.findByIdAndUpdate(
+          const updateWallet = walletFromDB + totalMealCame;
+
+          var userData = await UserModel.findByIdAndUpdate(
             { _id: userId },
             { wallet: updateWallet },
             { new: true }
@@ -228,7 +233,6 @@ const webhookCall = asyncHandler(async (req, res) => {
           //   res.status(200).json(response);
 
           // }
-          
         } else {
           console.log("orderDetail.status  - Captured");
         }
