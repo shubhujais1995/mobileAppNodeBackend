@@ -84,11 +84,11 @@ const webhookCall = asyncHandler(async (req, res) => {
         if (orderDetail.status !== "captured") {
           const userId = orderDetail.user_id.toString();
 
-          const userDetail = await UserModel.find({ _id: userId });
+          const userDetail = await UserModel.findOne({ _id: userId });
 
           const totalMealCame = parseInt(mealCreated.amount / 70);
 
-          const walletFromDB =  (!userDetail[0].wallet) ? userDetail[0].wallet  : 0;
+          const walletFromDB =  (userDetail.wallet == null) ? 0:userDetail.wallet;
 
           const updateWallet = walletFromDB + totalMealCame;
 
