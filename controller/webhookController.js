@@ -88,13 +88,24 @@ const webhookCall = asyncHandler(async (req, res) => {
 
           const totalMealCame = parseInt(mealCreated.amount / 70);
 
-          const walletFromDB =  (userDetail.wallet == null) ? 0:userDetail.wallet;
+          const walletFromDB =
+            userDetail.wallet == null ? 0 : userDetail.wallet;
 
           const updateWallet = walletFromDB + totalMealCame;
 
           var userData = await UserModel.findByIdAndUpdate(
             { _id: userId },
             { wallet: updateWallet },
+            { new: true }
+          );
+
+          const orderId = orderDetail._id.toString();
+          const status = mealCreated.status;
+          const amount = mealCreated.amount;
+
+          await Order.findByIdAndUpdate(
+            { _id: orderId },
+            { status, amount },
             { new: true }
           );
 
