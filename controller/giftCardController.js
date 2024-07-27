@@ -160,10 +160,6 @@ const getGiftCardById = asyncHandler(async (req, res) => {
 
 const redeemGiftCard = asyncHandler(async (req, res) => {
   const currentUserRole = req.user.user_role;
- 
-  var adminUser = req.user;
-  var adminUserId = adminUser.id;
-
   var userDetail =null;
   var user_id = "";
    try {
@@ -206,18 +202,19 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
             { new: true }
           );
     
+          var adminUser = await User.findOne({ _id: req.user.id });
           var total_redeem = 0
      
-          if(!userDetail.total_redeem){
+          if(!adminUser.total_redeem){
             total_redeem = 0;
           }else{
-            total_redeem = userDetail.total_redeem;
+            total_redeem = adminUser.total_redeem;
           }
 
            total_redeem = total_redeem + 1;
   
           await User.findByIdAndUpdate(
-            { _id:adminUserId },
+            { _id:adminUser.id },
             { total_redeem:total_redeem },
             { new: true }
           );
