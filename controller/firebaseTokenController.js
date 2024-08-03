@@ -37,11 +37,7 @@ const addFbToken = asyncHandler(async (req, res) => {
       );
       res.status(201).json(response);
     }
-    sendPushNotification(
-      req.user.id,
-      "Test Notifiation to Amit",
-      "From Node JS "
-    );
+  
   } catch (error) {
     const response = createResponse("error", "Error while setting token", null);
     res.status(201).json(response);
@@ -61,12 +57,19 @@ const sendPushNotification = async (userId, title, messageBody) => {
 
     let userTokenList = userTokens.map(({ firebaseToken }) => firebaseToken);
 
+
     console.log("userTokenList :", userTokenList);
     const message = {
       notification: {
-        title: title,
+        title: "Test" + title,
         body: messageBody,
       },
+      android: {
+        notification: {
+            channelId: 'aai-tag',
+        }
+    },
+      data: {Key1: 'ValueSomething', AgainKey: 'NewHelp', OwnKey: '12345'},
       tokens: userTokenList,
     };
 
