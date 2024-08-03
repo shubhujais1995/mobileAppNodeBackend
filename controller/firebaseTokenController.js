@@ -51,7 +51,7 @@ const createResponse = (status, message, data) => {
   };
 };
 
-const sendPushNotification = async (userId, title, messageBody) => {
+const sendPushNotification = async (userId, title,messageBody,screenName, giftCardId, ) => {
   try {
     const userTokens = await FBTOKEN.find({ user_id: userId });
 
@@ -61,7 +61,7 @@ const sendPushNotification = async (userId, title, messageBody) => {
     console.log("userTokenList :", userTokenList);
     const message = {
       notification: {
-        title: "Test" + title,
+        title: title,
         body: messageBody,
       },
       android: {
@@ -69,7 +69,7 @@ const sendPushNotification = async (userId, title, messageBody) => {
             channelId: 'aai-tag',
         }
     },
-      data: {Key1: 'ValueSomething', AgainKey: 'NewHelp', OwnKey: '12345'},
+      data: {screenName: screenName, giftCardId: giftCardId,},
       tokens: userTokenList,
     };
 

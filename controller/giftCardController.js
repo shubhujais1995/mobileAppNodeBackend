@@ -192,7 +192,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
             null
           );
           res.status(200).json(response);
-          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name,"We are unable to redeem meal from your account. Please add more meals");
+          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name,"We are unable to redeem meal from your account. Please add more meals","/gift-card-detail-page",gifCardDetail._id.toString());
         } else {
           let available_meals = gifCardDetail.available_meals - 1;
           const _id = gifCardDetail._id.toString();
@@ -219,7 +219,7 @@ const redeemGiftCard = asyncHandler(async (req, res) => {
             { new: true }
           );
           console.log("updated");
-          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name+", Thank you","We have successfully redeem an meal from your account");
+          firebaseTokenController.sendPushNotification(user_id, "Dear "+userDetail.name+", Thank you","We have successfully redeem an meal from your account","/gift-card-detail-page",gifCardDetail._id.toString());
           const response = createResponse(
             "success",
             "Meal redeem succesfully!",
