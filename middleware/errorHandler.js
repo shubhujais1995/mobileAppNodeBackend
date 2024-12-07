@@ -2,7 +2,7 @@ const { constants } = require("../constant");
 
 const errorHandler = (err, req, res, next) => {
   const statusCode = res.statusCode ? res.statusCode : 500;
-  console.log("error has occured -", res.statusCode);
+  console.log("error has occured-", res.statusCode);
   switch (statusCode) {
     // case constants.DUPLICATE_ERROR:
     //   res.json({
