@@ -11,6 +11,7 @@ const AddOrderGetPaymentId = asyncHandler(async (req, res) => {
       throw new Error("All fields are mandatory in AddOrderGetPaymentId API");
     }
 
+    
     const url = "https://api.razorpay.com/v1/orders";
     const AuthorizationToken =
       "Basic cnpwX3Rlc3RfbEg4OU5HaVRhaFprODY6ZGJKaVZVeEhDeEo2VnBJc3JjdWxpMzJq";
